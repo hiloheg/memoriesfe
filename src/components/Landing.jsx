@@ -1,3 +1,4 @@
+import LegalIdentity from './LegalIdentity.jsx'
 import { useEffect, useRef, useState } from 'react'
 import { GoogleLogin, GoogleOAuthProvider } from '@react-oauth/google'
 import { Link } from 'react-router-dom'
@@ -285,9 +286,12 @@ function LandingPage({ error, notice, onLogin }) {
         <Logo label={false} />
         <p>imemories, short for Instant Memories.</p>
         <nav className="lp-legal" aria-label="Legal">
+          <Link to="/terms">Terms</Link>
           <Link to="/privacy">Privacy policy</Link>
+          <Link to="/refunds">Refunds and withdrawal</Link>
           <button type="button" className="linklike" onClick={reopenConsent}>Cookie settings</button>
         </nav>
+        <LegalIdentity />
       </footer>
       <CookieBanner />
     </div>

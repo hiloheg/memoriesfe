@@ -178,7 +178,7 @@ function ProfilePage({ slug, eventSlug }) {
         </section>
       )}
 
-      <footer className="gallery-foot"><Link to="/" className="logo-link" aria-label="Go to the imemories home page"><Logo label={false} /></Link><Link to="/privacy" className="legal-link">Privacy policy</Link></footer>
+      <footer className="gallery-foot"><Link to="/" className="logo-link" aria-label="Go to the imemories home page"><Logo label={false} /></Link><Link to="/terms" className="legal-link">Terms</Link><Link to="/privacy" className="legal-link">Privacy policy</Link><Link to="/refunds" className="legal-link">Refunds</Link></footer>
     </main>
     </div>
   )

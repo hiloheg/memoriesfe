@@ -228,6 +228,15 @@ export default function Privacy() {
           </p>
         </section>
 
+        <section id="payments">
+          <h2>Payments</h2>
+          <p>
+            Credits are paid through Lemon Squeezy, which processes the payment and issues the receipt as merchant of record.
+            We never see card details. We keep a record of your credits (your account id, amounts, dates and order numbers) to know your balance;
+            purchase and refund records are kept for accounting after an account is deleted.
+          </p>
+        </section>
+
         <p className="muted">
           We may update this policy. The date at the top shows the latest version; for important changes we will tell photographers when they sign in.
         </p>

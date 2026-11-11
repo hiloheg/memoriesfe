@@ -8,6 +8,9 @@ import Share from './pages/Share.jsx'
 import PublicProfile from './pages/PublicProfile.jsx'
 import Landing from './components/Landing.jsx'
 import Privacy from './pages/Privacy.jsx'
+import Refunds from './pages/Refunds.jsx'
+import Terms from './pages/Terms.jsx'
+import LegalFooter from './components/LegalFooter.jsx'
 import Logo from './components/Logo.jsx'
 import { PageLoader, TopProgress } from './components/Loaders.jsx'
 import MainNav from './components/MainNav.jsx'
@@ -56,6 +59,7 @@ function PhotographerShell() {
       <div className="shell">
         <Outlet />
       </div>
+      <LegalFooter />
     </div>
     </CreditsProvider>
   )
@@ -71,6 +75,8 @@ function App() {
         <Route path="/profile" element={<ProfileEditor />} />
       </Route>
       <Route path="/privacy" element={<Privacy />} />
+      <Route path="/terms" element={<Terms />} />
+      <Route path="/refunds" element={<Refunds />} />
       <Route path="/e/:token" element={<PublicGallery />} />
       <Route path="/:slug" element={<PublicProfile />} />
       <Route path="/:slug/:eventSlug" element={<PublicProfile />} />

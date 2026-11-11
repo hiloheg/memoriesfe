@@ -1079,3 +1079,12 @@ button.linklike:hover { color: var(--accent-strong); background: none; }
 @media (max-width: 520px) {
   .locked-notice { flex-direction: column; align-items: stretch; text-align: center; }
 }
+
+/* Legal footer: who we are, the legal pages and the consumer-protection links. */
+.legal-footer { max-width: 1080px; margin: 0 auto; padding: 28px 24px calc(28px + env(safe-area-inset-bottom)); display: flex; flex-direction: column; gap: 14px; color: var(--ink-soft); font-size: 0.88rem; }
+.legal-id { font-style: normal; display: flex; flex-direction: column; gap: 2px; }
+.legal-links { display: flex; flex-wrap: wrap; gap: 6px 16px; }
+.legal-links a, .legal-links button { color: inherit; }
+.legal-sal { align-self: flex-start; display: inline-block; }
+.legal-sal img { display: block; max-width: 100%; height: auto; }
+@media (max-width: 560px) { .legal-footer { padding-left: 16px; padding-right: 16px; } }
