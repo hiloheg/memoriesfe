@@ -23,6 +23,22 @@ export function savings(pack) {
   return { amount, percent: Math.round((amount / (PACKS[0].price * p.credits)) * 100) }
 }
 
+const ENTRY_TITLES = {
+  welcome: 'Free credit',
+  purchase: 'Credits bought',
+  event: 'Used to create an event',
+  refund: 'Purchase refunded',
+}
+
+/** A credit ledger row as a line on the transactions page: what happened, and the signed change. */
+export function describeEntry(row) {
+  return {
+    title: ENTRY_TITLES[row.reason] ?? 'Credit change',
+    change: `${row.delta > 0 ? '+' : '−'}${Math.abs(row.delta)}`,
+    gain: row.delta > 0,
+  }
+}
+
 /** What a plan gives: photos, days online, and how many cameras (null = no limit). */
 export function describePlan(plan) {
   return plan === 'trial'

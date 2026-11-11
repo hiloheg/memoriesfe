@@ -51,6 +51,7 @@ export default function UserMenu() {
             </div>
           </Link>
           <Link role="menuitem" to="/profile" className="btn menu-item" onClick={() => setOpen(false)}>Edit your page</Link>
+          <Link role="menuitem" to="/transactions" className="btn menu-item" onClick={() => setOpen(false)}>Transactions</Link>
           <button role="menuitem" className="menu-item" onClick={logout}>Sign out</button>
         </div>
       )}

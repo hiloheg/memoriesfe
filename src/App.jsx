@@ -3,6 +3,7 @@ import { useAuth } from './auth.jsx'
 import EventDetail from './pages/EventDetail.jsx'
 import Events from './pages/Events.jsx'
 import PublicGallery from './pages/PublicGallery.jsx'
+import Transactions from './pages/Transactions.jsx'
 import ProfileEditor from './pages/ProfileEditor.jsx'
 import Share from './pages/Share.jsx'
 import PublicProfile from './pages/PublicProfile.jsx'
@@ -73,6 +74,7 @@ function App() {
         <Route path="/events/:id" element={<EventDetail />} />
         <Route path="/share" element={<Share />} />
         <Route path="/profile" element={<ProfileEditor />} />
+        <Route path="/transactions" element={<Transactions />} />
       </Route>
       <Route path="/privacy" element={<Privacy />} />
       <Route path="/terms" element={<Terms />} />

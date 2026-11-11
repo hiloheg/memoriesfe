@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { PACKS, savings, confirmSummary, createWatcher, isStale, daysLeft, describePlan, eventStatus, expiryDate, lockedMessage, perEvent, planToSpend, shouldResumePolling, shouldStopPolling, shouldWarn } from './credits.js'
+import { PACKS, savings, describeEntry, confirmSummary, createWatcher, isStale, daysLeft, describePlan, eventStatus, expiryDate, lockedMessage, perEvent, planToSpend, shouldResumePolling, shouldStopPolling, shouldWarn } from './credits.js'
 
 test('the three packs and what each event costs', () => {
   assert.deepEqual(PACKS.map((p) => [p.pack, p.credits, p.price]), [[1, 1, 19], [5, 5, 85], [10, 10, 150]])
@@ -13,6 +13,14 @@ test('savings compare a pack with buying the same credits one by one', () => {
   assert.deepEqual(savings(1), { amount: 0, percent: 0 })
   assert.deepEqual(savings(5), { amount: 10, percent: 11 })
   assert.deepEqual(savings(10), { amount: 40, percent: 21 })
+})
+
+test('a ledger row reads as a line on the transactions page', () => {
+  assert.deepEqual(describeEntry({ delta: 1, kind: 'trial', reason: 'welcome' }), { title: 'Free credit', change: '+1', gain: true })
+  assert.deepEqual(describeEntry({ delta: 5, kind: 'full', reason: 'purchase' }), { title: 'Credits bought', change: '+5', gain: true })
+  assert.deepEqual(describeEntry({ delta: -1, kind: 'full', reason: 'event' }), { title: 'Used to create an event', change: '−1', gain: false })
+  assert.deepEqual(describeEntry({ delta: -5, kind: 'full', reason: 'refund' }), { title: 'Purchase refunded', change: '−5', gain: false })
+  assert.equal(describeEntry({ delta: 2, kind: 'full', reason: 'something-new' }).title, 'Credit change')
 })
 
 test('plans: trial is 300 photos for 30 days, full is 3000 photos for 90 days', () => {
