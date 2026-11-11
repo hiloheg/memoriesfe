@@ -9,9 +9,11 @@ export const LEGAL = {
   registry: env.VITE_COMPANY_REGISTRY ?? '',
   email: env.VITE_CONTACT_EMAIL ?? '',
   phone: env.VITE_CONTACT_PHONE ?? '',
-  anpcUrl: 'https://anpc.ro',
-  // The national alternative dispute resolution (SAL) platform. The old EU "SOL" link was removed by Ordin 270/2026 and must not be added.
-  salUrl: 'https://reclamatiisal.anpc.ro',
+  // The two footer links exactly as ANPC publishes them. The old EU "SOL" link was removed by Ordin 270/2026 and must not be added.
+  anpcUrl: 'https://www.anpc.ro/?ref=footer_3_6',
+  anpcLabel: 'PROTECŢIA CONSUMATORILOR - A.N.P.C.',
+  salUrl: 'https://reclamatiisal.anpc.ro/Despre-noi/ref/footer_3_5',
+  salLabel: 'PROTECŢIA CONSUMATORILOR - A.N.P.C. – SAL (Solutionarea Alternativa a Litigiilor)',
 }
 
 /** The identity lines to print, in order; lines without a value are left out. */

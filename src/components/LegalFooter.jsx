@@ -15,13 +15,14 @@ export default function LegalFooter() {
         <Link to="/terms">Terms</Link>
         <Link to="/privacy">Privacy policy</Link>
         <Link to="/refunds">Refunds and withdrawal</Link>
-        <a href={LEGAL.anpcUrl} target="_blank" rel="noopener noreferrer">ANPC<span className="sr-only"> (opens in a new tab)</span></a>
+        <a href={LEGAL.anpcUrl} target="_blank" rel="noopener noreferrer">{LEGAL.anpcLabel}<span className="sr-only"> (opens in a new tab)</span></a>
+        <a href={LEGAL.salUrl} target="_blank" rel="noopener noreferrer">{LEGAL.salLabel}<span className="sr-only"> (opens in a new tab)</span></a>
         <button type="button" className="linklike" onClick={reopenConsent}>Cookie settings</button>
       </nav>
       <a className="legal-sal" href={LEGAL.salUrl} target="_blank" rel="noopener noreferrer">
         {sal
-          ? <img src={sal} width="250" height="62" alt="Alternative dispute resolution (SAL)" />
-          : 'Alternative dispute resolution (SAL)'}
+          ? <img src={sal} width="250" height="62" alt={LEGAL.salLabel} />
+          : LEGAL.salLabel}
       </a>
     </footer>
   )

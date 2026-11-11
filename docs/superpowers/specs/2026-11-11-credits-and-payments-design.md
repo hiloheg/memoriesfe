@@ -169,8 +169,8 @@ A footer on the dashboard (and the public home page) with:
   - Cod unic de înregistrare: 54766547, din data 26.05.2026
   - Still missing: the trade register number of the PFA (the "F" number, for example F40/…/2026), a contact email and a phone number. Keep them in one config object (frontend `legal.js`) so they are added in one place. **[owner to supply]**
   - The owner is a sole trader (PFA): the owner answers personally for the business. Worth mentioning to the accountant together with the VAT status (Lemon Squeezy collects the VAT on sales as merchant of record).
-- **ANPC link:** https://anpc.ro **[verify]**
-- **SAL pictogram:** 250 x 50 px image, downloaded from the ANPC site, linking to https://reclamatiisal.anpc.ro. This follows Ordin 449/2022 as amended by Ordin 270/2026 (found on legislatie.just.ro and anpc.ro). **[verify the consolidated text and download the official image from anpc.ro]**
+- **ANPC link:** https://www.anpc.ro/?ref=footer_3_6 **[verify]**
+- **SAL pictogram:** 250 x 50 px image, downloaded from the ANPC site, linking to https://reclamatiisal.anpc.ro/Despre-noi/ref/footer_3_5. This follows Ordin 449/2022 as amended by Ordin 270/2026 (found on legislatie.just.ro and anpc.ro). **[verify the consolidated text and download the official image from anpc.ro]**
 - **Do not add the old EU "SOL / ODR" link.** The ANPC amendment says the European platform was repealed (Regulation 2024/3228). **[verify]**
 - **Terms and conditions, privacy policy, refund and withdrawal policy, cookie information.** Privacy already exists; terms and refund policy are to be written.
 - **Withdrawal:** consumer law gives 14 days to withdraw, and for digital services that start immediately the buyer must give express consent and acknowledge the loss of the right. Lemon Squeezy's checkout and terms cover part of this as seller of record, but a Romanian lawyer should confirm who the "trader" is for ANPC purposes and what the site itself must show. A June 2026 article on OUG 18/2026 says a "simple click" withdrawal function is required from the customer account; I could not verify it from primary sources. **[needs a lawyer]**

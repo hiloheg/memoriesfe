@@ -18,8 +18,10 @@ test('registry number, email and phone are added after the CUI when known', () =
   assert.ok(lines[5].includes('+40 700 000 000'))
 })
 
-test('the dispute links point to ANPC and its SAL platform, never to the repealed EU platform', () => {
-  assert.equal(LEGAL.anpcUrl, 'https://anpc.ro')
-  assert.equal(LEGAL.salUrl, 'https://reclamatiisal.anpc.ro')
+test('the dispute links are the ones ANPC gives for footers, never the repealed EU platform', () => {
+  assert.equal(LEGAL.anpcUrl, 'https://www.anpc.ro/?ref=footer_3_6')
+  assert.equal(LEGAL.anpcLabel, 'PROTECŢIA CONSUMATORILOR - A.N.P.C.')
+  assert.equal(LEGAL.salUrl, 'https://reclamatiisal.anpc.ro/Despre-noi/ref/footer_3_5')
+  assert.equal(LEGAL.salLabel, 'PROTECŢIA CONSUMATORILOR - A.N.P.C. – SAL (Solutionarea Alternativa a Litigiilor)')
   for (const value of Object.values(LEGAL)) assert.ok(!String(value).includes('ec.europa.eu'), value)
 })
