@@ -20,7 +20,7 @@ const columnsFor = (width) => Math.max(1, Math.min(4, Math.floor((width + 8) / 1
  * more photos load by themselves as the visitor scrolls.
  */
 export default function PhotoStream({ slug, eventSlug, fallbackName, fallbackDate }) {
-  const [info, setInfo] = useState({ name: fallbackName, eventDate: fallbackDate, total: null, logoUrl: '' })
+  const [info, setInfo] = useState({ name: fallbackName, eventDate: fallbackDate, total: null, logoUrl: '', canEdit: true })
   const [photos, setPhotos] = useState([])
   const [tags, setTags] = useState([]) // cameras and guests of the event, from the first page
   const [selected, setSelected] = useState(() => new Set())
@@ -65,11 +65,11 @@ export default function PhotoStream({ slug, eventSlug, fallbackName, fallbackDat
         return
       }
       setGate(null)
-      if (!r.ok) throw new Error('Could not load the photos.')
+      if (!r.ok) throw new Error(r.status === 410 ? 'This gallery has expired. The photographer’s photos are no longer online.' : 'Could not load the photos.')
       const page = await r.json()
       if (mine !== generation.current) return
       // Keep the first logo URL: the server re-signs it on every page, and a changed string would reload the editor.
-      setInfo((old) => ({ name: page.name, eventDate: page.eventDate, total: page.total, logoUrl: old.logoUrl || page.logoUrl || '' }))
+      setInfo((old) => ({ name: page.name, eventDate: page.eventDate, total: page.total, logoUrl: old.logoUrl || page.logoUrl || '', canEdit: page.features?.editor ?? true }))
       setTags(page.tags)
       setGuestLimit(page.guestLimit)
       // Photos uploaded meanwhile shift the offsets, so skip any we already have.
@@ -153,7 +153,7 @@ export default function PhotoStream({ slug, eventSlug, fallbackName, fallbackDat
       )}
       {!done && !gate && <div ref={sentinel} className="stream-sentinel" aria-hidden="true" />}
 
-      <Lightbox photos={photos} index={openIndex} onIndex={setOpenIndex} onClose={() => setOpenIndex(null)} onNearEnd={more} logoUrl={info.logoUrl} />
+      <Lightbox photos={photos} index={openIndex} onIndex={setOpenIndex} onClose={() => setOpenIndex(null)} onNearEnd={more} logoUrl={info.logoUrl} canEdit={info.canEdit} />
     </section>
   )
 }

@@ -84,3 +84,8 @@ export function eventStatus(event, now = new Date()) {
   if (shouldWarn(event.plan, days)) return { kind: 'warning', text: `Expires in ${days} ${days === 1 ? 'day' : 'days'}. Download what you need` }
   return { kind: 'active', text: `Online for ${days} more ${days === 1 ? 'day' : 'days'}` }
 }
+
+/** The server answers 403 with a message starting "locked:" for features that need a purchase; returns the plain text, or null for any other message. */
+export function lockedMessage(message) {
+  return typeof message === 'string' && message.startsWith('locked:') ? message.slice('locked:'.length).trim() : null
+}

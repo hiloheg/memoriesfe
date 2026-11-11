@@ -51,7 +51,7 @@ function LightboxImage({ url, fallback, logoUrl }) {
 }
 
 /** Photo viewer: arrows, keyboard and swipe. `index` is null when closed. */
-export default function Lightbox({ photos, index, onIndex, onClose, onNearEnd, logoUrl = '' }) {
+export default function Lightbox({ photos, index, onIndex, onClose, onNearEnd, logoUrl = '', canEdit = true }) {
   const [touchX, setTouchX] = useState(null)
   const [editing, setEditing] = useState(false)
   const [sheet, setSheet] = useState(false) // the "Download / Edit and download" choice
@@ -104,7 +104,9 @@ export default function Lightbox({ photos, index, onIndex, onClose, onNearEnd, l
       <div className="lb-bar" onClick={(e) => e.stopPropagation()}>
         <span>{index + 1} of {count}</span>
         <span style={{ display: 'flex', gap: 8 }}>
-          <button type="button" aria-haspopup="menu" aria-expanded={sheet} onClick={() => setSheet((v) => !v)}>Download</button>
+          {/* Without the editor (the photographer has not unlocked it) Download saves the photo straight away. */}
+          <button type="button" aria-haspopup={canEdit ? 'menu' : undefined} aria-expanded={canEdit ? sheet : undefined}
+            onClick={() => (canEdit ? setSheet((v) => !v) : download(current))} disabled={!canEdit && saving}>{!canEdit && saving ? 'Preparing...' : 'Download'}</button>
           <button onClick={onClose}>Close</button>
         </span>
       </div>
@@ -116,7 +118,7 @@ export default function Lightbox({ photos, index, onIndex, onClose, onNearEnd, l
         </>
       )}
     </div>
-    {sheet && (
+    {canEdit && sheet && (
       <div className="lb-sheet-wrap" onClick={() => setSheet(false)}>
         <div className="lb-sheet" role="menu" aria-label="Download options" onClick={(e) => e.stopPropagation()}>
           <button type="button" role="menuitem" onClick={() => download(current)} disabled={saving}>
@@ -131,7 +133,7 @@ export default function Lightbox({ photos, index, onIndex, onClose, onNearEnd, l
         </div>
       </div>
     )}
-    {editing && <PhotoEditor photo={current} logoUrl={logoUrl} onClose={closeEditor} />}
+    {canEdit && editing && <PhotoEditor photo={current} logoUrl={logoUrl} onClose={closeEditor} />}
     </>
   )
 }

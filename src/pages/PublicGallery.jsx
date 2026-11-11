@@ -37,7 +37,7 @@ export default function PublicGallery() {
         setGate(null)
         return r
       })
-      .then((r) => (r === null ? null : r.ok ? r.json() : Promise.reject(new Error(r.status === 404 ? 'This gallery does not exist. Check the link or scan the code again.' : 'Could not load the photos. Try again in a moment.'))))
+      .then((r) => (r === null ? null : r.ok ? r.json() : Promise.reject(new Error(r.status === 404 ? 'This gallery does not exist. Check the link or scan the code again.' : r.status === 410 ? 'This gallery has expired. The photographer’s photos are no longer online.' : 'Could not load the photos. Try again in a moment.'))))
       .then((g) => { if (g) { setGallery(g); document.title = g.name } })
       .catch((e) => setError(e.message))
   }, [token, slug, eventSlug, password, reload])
@@ -108,7 +108,7 @@ export default function PublicGallery() {
 
       <footer className="gallery-foot"><Link to="/" className="logo-link" aria-label="Go to the imemories home page"><Logo label={false} /></Link><Link to="/privacy" className="legal-link">Privacy policy</Link></footer>
 
-      <Lightbox photos={flat} index={openIndex} onIndex={setOpenIndex} onClose={close} logoUrl={gallery.logoUrl ?? ''} />
+      <Lightbox photos={flat} index={openIndex} onIndex={setOpenIndex} onClose={close} logoUrl={gallery.logoUrl ?? ''} canEdit={gallery.features?.editor ?? true} />
     </main>
   )
 }

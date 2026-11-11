@@ -2,6 +2,8 @@ import { FRAMES, frameClass } from '../frames.js'
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ACCENTS, SOCIAL_COLORS, readError, squareJpeg } from '../accents.js'
+import { lockedMessage } from '../credits.js'
+import LockedNotice from '../components/LockedNotice.jsx'
 import { useAuth } from '../auth.jsx'
 import Backdrop from '../components/Backdrop.jsx'
 import { Spinner } from '../components/Loaders.jsx'
@@ -196,6 +198,7 @@ function PreviewCard({ draft, picture }) {
 /** Edit the public page and account: five tabs, a live preview and one save bar. */
 export default function ProfileEditor() {
   const { user, setUser, apiFetch, logout } = useAuth()
+  const locked = user.unlocked === false // the look and the logo come with the first purchase
   const fileInput = useRef(null)
   const [tab, setTab] = useState('profile')
   const [saved, setSaved] = useState(() => draftFrom(user))
@@ -245,7 +248,10 @@ export default function ProfileEditor() {
       body: JSON.stringify(requestFrom(draft)),
     })
     setBusy(false)
-    if (!r.ok) return setStatus({ kind: 'error', text: await readError(r, `Could not save (${r.status})`) })
+    if (!r.ok) {
+      const message = await readError(r, `Could not save (${r.status})`)
+      return setStatus({ kind: 'error', text: lockedMessage(message) ?? message })
+    }
     const next = await r.json()
     setUser((u) => ({ ...u, ...next }))
     const fresh = draftFrom({ ...user, ...next })
@@ -305,7 +311,7 @@ export default function ProfileEditor() {
       setUser((u) => ({ ...u, logo: next.logo }))
       setStatus({ kind: 'ok', text: 'Logo updated.' })
     } catch (err) {
-      setStatus({ kind: 'error', text: err.message || 'Could not use that image. Try a PNG.' })
+      setStatus({ kind: 'error', text: lockedMessage(err.message) ?? (err.message || 'Could not use that image. Try a PNG.') })
     }
     setLogoBusy(false)
   }
@@ -413,6 +419,8 @@ export default function ProfileEditor() {
           </div>
 
           <div role="tabpanel" id="panel-look" aria-labelledby="tab-look" hidden={tab !== 'look'} className="panel-stack">
+            <LockedNotice locked={locked}>Your page shows the default look. Choosing your own look, adding your logo and letting guests edit photos before they download come with your first pack.</LockedNotice>
+            <fieldset className="locked-fields" disabled={locked}>
             <fieldset className="field">
               <legend className="field-label">Accent color</legend>
               <div className="swatches" role="radiogroup" aria-label="Accent color">
@@ -428,15 +436,17 @@ export default function ProfileEditor() {
             <BackgroundControls draft={draft} setBg={setBg} />
             <FrameControls draft={draft} setBg={setBg} />
             <SocialColorControls draft={draft} setBg={setBg} />
+            </fieldset>
           </div>
 
           <div role="tabpanel" id="panel-logo" aria-labelledby="tab-logo" hidden={tab !== 'logo'} className="panel-stack">
+            <LockedNotice locked={locked}>Your logo is not added to downloaded photos yet.</LockedNotice>
             <div className="field">
               <span className="field-label">Your logo</span>
               <div className="photo-row">
                 <span className="logo-preview">{user.logo && <img src={user.logo} alt="Your logo" />}</span>
                 <div className="photo-actions">
-                  <button type="button" onClick={() => logoInput.current?.click()} disabled={logoBusy}>{logoBusy && <Spinner />}{logoBusy ? 'Uploading…' : user.logo ? 'Replace logo' : 'Upload logo'}</button>
+                  <button type="button" onClick={() => logoInput.current?.click()} disabled={logoBusy || locked}>{logoBusy && <Spinner />}{logoBusy ? 'Uploading…' : user.logo ? 'Replace logo' : 'Upload logo'}</button>
                   {user.logo && <button type="button" className="quiet" onClick={removeLogo} disabled={logoBusy}>Remove logo</button>}
                   <input ref={logoInput} type="file" accept="image/png,image/jpeg,image/webp" hidden onChange={uploadLogo} />
                 </div>

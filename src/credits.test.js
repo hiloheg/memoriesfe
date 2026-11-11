@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { PACKS, confirmSummary, daysLeft, describePlan, eventStatus, expiryDate, perEvent, planToSpend, shouldStopPolling, shouldWarn } from './credits.js'
+import { PACKS, confirmSummary, daysLeft, describePlan, eventStatus, expiryDate, lockedMessage, perEvent, planToSpend, shouldStopPolling, shouldWarn } from './credits.js'
 
 test('the three packs and what each event costs', () => {
   assert.deepEqual(PACKS.map((p) => [p.pack, p.credits, p.price]), [[1, 1, 19], [5, 5, 85], [10, 10, 150]])
@@ -79,4 +79,10 @@ test('event status: online, warning, expired and purged', () => {
   const purged = eventStatus({ ...base, expired: true, expiresAt: day(-20), purgeAfter: day(-6), purgedAt: new Date('2026-11-20T03:30:00Z').toISOString() }, now)
   assert.deepEqual(purged, { kind: 'purged', text: 'Photos deleted on 20 Nov 2026' })
   assert.equal(eventStatus({ plan: null, expiresAt: null, purgedAt: null, expired: false }, now), null, 'an event without a plan shows nothing')
+})
+
+test('a locked answer from the server becomes a plain message', () => {
+  assert.equal(lockedMessage('locked: Buy any pack to change the look of your page'), 'Buy any pack to change the look of your page')
+  assert.equal(lockedMessage('Something else'), null)
+  assert.equal(lockedMessage(undefined), null)
 })
