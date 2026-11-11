@@ -25,7 +25,7 @@ export function CreditsProvider({ children }) {
     if (inflight.current) return inflight.current
     const request = (async () => {
       try {
-        const r = await apiFetch('/api/v1/credits')
+        const r = await apiFetch('/api/v1/credits', { quiet: true })
         if (!r.ok) return null
         const d = await r.json()
         total.current = d.balance.total

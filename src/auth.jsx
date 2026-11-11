@@ -74,8 +74,9 @@ export function AuthProvider({ children }) {
   }, [token, clear])
 
   const apiFetch = useCallback(
-    (path, options = {}) => {
-      setPending((n) => n + 1)
+    // `quiet` keeps a background request (like the credit balance) from showing the page loading bar.
+    (path, { quiet = false, ...options } = {}) => {
+      if (!quiet) setPending((n) => n + 1)
       return fetch(`${API_URL}${path}`, {
         ...options,
         headers: { ...options.headers, Authorization: `Bearer ${token}` },
@@ -84,7 +85,7 @@ export function AuthProvider({ children }) {
           if (r.status === 401) clear('Your session expired. Sign in again to continue.')
           return r
         })
-        .finally(() => setPending((n) => n - 1))
+        .finally(() => { if (!quiet) setPending((n) => n - 1) })
     },
     [token, clear],
   )
