@@ -3,9 +3,8 @@ import { reopenConsent } from '../consent.js'
 import { LEGAL } from '../legal.js'
 import LegalIdentity from './LegalIdentity.jsx'
 
-// The official SAL pictogram (250 x 50 px) is downloaded from anpc.ro and saved as src/assets/sal.png.
-// Until that file exists the footer shows the same link as text, so the build never depends on it.
-const sal = Object.values(import.meta.glob('../assets/sal.png', { eager: true, query: '?url', import: 'default' }))[0]
+// The ANPC SAL pictogram. If the file is ever removed the footer shows the same link as text, so the build never depends on it.
+const sal = Object.values(import.meta.glob('../assets/anpc-sal.svg', { eager: true, query: '?url', import: 'default' }))[0]
 
 /** Who we are, the legal pages and the consumer-protection links. Shown at the bottom of the photographer area and the sign-in page. */
 export default function LegalFooter() {
@@ -21,7 +20,7 @@ export default function LegalFooter() {
       </nav>
       <a className="legal-sal" href={LEGAL.salUrl} target="_blank" rel="noopener noreferrer">
         {sal
-          ? <img src={sal} width="250" height="50" alt="Alternative dispute resolution (SAL)" />
+          ? <img src={sal} width="250" height="62" alt="Alternative dispute resolution (SAL)" />
           : 'Alternative dispute resolution (SAL)'}
       </a>
     </footer>
