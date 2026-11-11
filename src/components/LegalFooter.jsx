@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { reopenConsent } from '../consent.js'
 import { LEGAL } from '../legal.js'
+import CookieBanner from './CookieBanner.jsx'
 import LegalIdentity from './LegalIdentity.jsx'
 
 // The ANPC SAL pictogram. If the file is ever removed the footer shows the same link as text, so the build never depends on it.
@@ -26,6 +27,8 @@ export default function LegalFooter() {
           {sal ? <img src={sal} width="186" height="46" alt="" /> : 'Alternative dispute resolution (SAL)'}
         </a>
       </div>
+      {/* "Cookie settings" reopens the banner, so the banner has to be on every page that has the button. */}
+      <CookieBanner />
     </footer>
   )
 }
