@@ -10,10 +10,17 @@ test('the identity lines are exactly what the owner gave, in order', () => {
   ])
 })
 
-test('registry number, email and phone are added after the CUI when known', () => {
-  const lines = legalLines({ ...LEGAL, registry: 'F40/1234/2026', email: 'hello@imemories.eu', phone: '+40 700 000 000' })
+test('the trade register number is part of the details, after the CUI', () => {
+  assert.equal(LEGAL.registry, 'F2026027565005')
+  const lines = legalLines({ ...LEGAL, email: '', phone: '' })
+  assert.equal(lines[3], 'Nr. de ordine în registrul comerțului: F2026027565005')
+  assert.equal(lines.length, 4)
+})
+
+test('email and phone are added after the register number when known', () => {
+  const lines = legalLines({ ...LEGAL, email: 'hello@imemories.eu', phone: '+40 700 000 000' })
   assert.equal(lines.length, 6)
-  assert.ok(lines[3].includes('F40/1234/2026'))
+  assert.ok(lines[3].includes('F2026027565005'))
   assert.ok(lines[4].includes('hello@imemories.eu'))
   assert.ok(lines[5].includes('+40 700 000 000'))
 })
