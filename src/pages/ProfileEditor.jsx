@@ -1,11 +1,13 @@
+import { FRAMES, frameClass } from '../frames.js'
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ACCENTS, readError, squareJpeg } from '../accents.js'
+import { ACCENTS, SOCIAL_COLORS, readError, squareJpeg } from '../accents.js'
 import { useAuth } from '../auth.jsx'
 import Backdrop from '../components/Backdrop.jsx'
 import { Spinner } from '../components/Loaders.jsx'
 import YourData from '../components/YourData.jsx'
 import Modal from '../components/Modal.jsx'
+import LogoFit from '../components/LogoFit.jsx'
 import ProfileHero from '../components/ProfileHero.jsx'
 import { Avatar } from '../components/UserMenu.jsx'
 import { COLORS, DEFAULT_BACKGROUND, EFFECTS, GRADIENTS, PATTERNS, themeVars } from '../backgrounds.js'
@@ -15,6 +17,7 @@ const TABS = [
   { key: 'profile', label: 'Profile' },
   { key: 'links', label: 'Links' },
   { key: 'look', label: 'Look' },
+  { key: 'logo', label: 'Logo' },
   { key: 'account', label: 'Account' },
 ]
 
@@ -34,8 +37,62 @@ function requestFrom(d) {
     name: d.name, slug: d.slug, tagline: d.tagline, bio: d.bio, accent: d.accent,
     website: d.website, instagram: d.instagram, followGate: d.followGate,
     links: d.links.filter((l) => l.label.trim() || l.url.trim()).map((l) => ({ label: l.label, url: l.url })),
-    bgKind: d.bg.kind, bgValue: d.bg.value, bgPattern: d.bg.pattern, bgEffect: d.bg.effect,
+    bgKind: d.bg.kind, bgValue: d.bg.value, bgPattern: d.bg.pattern, bgEffect: d.bg.effect, bgFrame: d.bg.frame, bgSocial: d.bg.social,
   }
+}
+
+/** A tiny profile (picture, tag, photo) drawn in the frame, inside a radio option. */
+function FrameOption({ frame, checked, onChange }) {
+  return (
+    <label className="look-opt">
+      <input type="radio" name="frame" checked={checked} onChange={onChange} />
+      <span>
+        <span className={`look-preview fr-sample ${frameClass(frame.key)}`}>
+          <span className="profile-avatar"><span className="avatar-dot" /></span>
+          <span className="tag-filter"><span className="tab" aria-pressed="true" /><span className="tab" /></span>
+          <span className="photo"><span className="sample-img" /></span>
+        </span>
+        {frame.name}
+      </span>
+    </label>
+  )
+}
+
+/** Color of the follow buttons on the page: the page accent, black, white or one of the accent colors. */
+function SocialColorControls({ draft, setBg }) {
+  const value = draft.bg.social || ''
+  return (
+    <fieldset className="field">
+      <legend className="field-label">Social button color</legend>
+      <div className="swatches" role="radiogroup" aria-label="Social button color">
+        <label className="swatch-match" title="Use the accent color of your page">
+          <input type="radio" name="social" checked={value === ''} onChange={() => setBg({ social: '' })} />
+          <span className="dot" />
+          Match accent
+        </label>
+        {SOCIAL_COLORS.map((c) => (
+          <label key={c.value} className={c.value === '#ffffff' ? 'swatch light' : 'swatch'} title={c.name}>
+            <input type="radio" name="social" value={c.value} checked={value === c.value} onChange={() => setBg({ social: c.value })} />
+            <span style={{ background: c.value }} />
+            <span className="sr-only">{c.name}</span>
+          </label>
+        ))}
+      </div>
+      <small className="muted">The color of your follow buttons, so they stand out on your page.</small>
+    </fieldset>
+  )
+}
+
+function FrameControls({ draft, setBg }) {
+  return (
+    <fieldset className="field">
+      <legend className="field-label">Frame</legend>
+      <div className="look-grid" role="radiogroup" aria-label="Frame">
+        {FRAMES.map((f) => <FrameOption key={f.key} frame={f} checked={draft.bg.frame === f.key} onChange={() => setBg({ frame: f.key })} />)}
+      </div>
+      <small className="muted">Frames your picture, header, tags and photos in one style.</small>
+    </fieldset>
+  )
 }
 
 /** A small preview of the choice (a background, pattern or effect) inside a radio option. */
@@ -109,18 +166,24 @@ function PreviewCard({ draft, picture }) {
   const profile = { ...draft, picture, background: draft.bg }
   const buttons = draft.links.filter((l) => l.url && l.label)
   return (
-    <div className="look-frame" style={themeVars(profile)}>
+    <div className={`look-frame ${frameClass(draft.bg.frame)}`} style={themeVars(profile)}>
       <Backdrop bg={draft.bg} contained />
       <div className="look-content">
         <ProfileHero profile={profile} />
         {buttons.length > 0 && (
-          <div className="preview-follow">
+          <div className="preview-follow social-card">
             <p className="preview-follow-title">{draft.followGate ? `Follow ${(draft.name || 'you').split(' ')[0]} to see the photos` : 'Follow buttons'}</p>
             <div className="profile-links">
               {buttons.map((l) => <span key={l.key} className="chip">{l.label}</span>)}
             </div>
           </div>
         )}
+        <div className="mini-tags tag-filter"><span className="tab" aria-pressed="true">All</span><span className="tab">Ceremony</span><span className="tab">Party</span></div>
+        <div className="photo-stream mini-stream">
+          <span className="photo"><span className="sample-img" /></span>
+          <span className="photo"><span className="sample-img" /></span>
+          <span className="photo"><span className="sample-img" /></span>
+        </div>
         <div className="mini-tiles">
           <div className="mini-tile">Your first event</div>
           <div className="mini-tile">Another event</div>
@@ -130,7 +193,7 @@ function PreviewCard({ draft, picture }) {
   )
 }
 
-/** Edit the public page and account: four tabs, a live preview and one save bar. */
+/** Edit the public page and account: five tabs, a live preview and one save bar. */
 export default function ProfileEditor() {
   const { user, setUser, apiFetch, logout } = useAuth()
   const fileInput = useRef(null)
@@ -140,6 +203,8 @@ export default function ProfileEditor() {
   const [status, setStatus] = useState(null) // { kind: 'ok' | 'error', text }
   const [busy, setBusy] = useState(false)
   const [photoBusy, setPhotoBusy] = useState(false)
+  const [logoBusy, setLogoBusy] = useState(false)
+  const logoInput = useRef(null)
   const [previewOpen, setPreviewOpen] = useState(false)
   const [copied, setCopied] = useState(false)
 
@@ -223,6 +288,36 @@ export default function ProfileEditor() {
     const next = await r.json()
     setUser((u) => ({ ...u, picture: next.picture, customPicture: next.customPicture }))
     setStatus({ kind: 'ok', text: 'Using your Google photo.' })
+  }
+
+  async function uploadLogo(e) {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    setLogoBusy(true)
+    setStatus(null)
+    try {
+      const body = new FormData()
+      body.append('file', file, file.name)
+      const r = await apiFetch('/api/v1/profile/logo', { method: 'POST', body })
+      if (!r.ok) throw new Error(await readError(r, `Could not upload the logo (${r.status})`))
+      const next = await r.json()
+      setUser((u) => ({ ...u, logo: next.logo }))
+      setStatus({ kind: 'ok', text: 'Logo updated.' })
+    } catch (err) {
+      setStatus({ kind: 'error', text: err.message || 'Could not use that image. Try a PNG.' })
+    }
+    setLogoBusy(false)
+  }
+
+  async function removeLogo() {
+    setLogoBusy(true)
+    const r = await apiFetch('/api/v1/profile/logo', { method: 'DELETE' })
+    setLogoBusy(false)
+    if (!r.ok) return setStatus({ kind: 'error', text: await readError(r, `Could not remove the logo (${r.status})`) })
+    const next = await r.json()
+    setUser((u) => ({ ...u, logo: next.logo }))
+    setStatus({ kind: 'ok', text: 'Logo removed.' })
   }
 
   function onTabKey(e) {
@@ -331,6 +426,29 @@ export default function ProfileEditor() {
               </div>
             </fieldset>
             <BackgroundControls draft={draft} setBg={setBg} />
+            <FrameControls draft={draft} setBg={setBg} />
+            <SocialColorControls draft={draft} setBg={setBg} />
+          </div>
+
+          <div role="tabpanel" id="panel-logo" aria-labelledby="tab-logo" hidden={tab !== 'logo'} className="panel-stack">
+            <div className="field">
+              <span className="field-label">Your logo</span>
+              <div className="photo-row">
+                <span className="logo-preview">{user.logo && <img src={user.logo} alt="Your logo" />}</span>
+                <div className="photo-actions">
+                  <button type="button" onClick={() => logoInput.current?.click()} disabled={logoBusy}>{logoBusy && <Spinner />}{logoBusy ? 'Uploading…' : user.logo ? 'Replace logo' : 'Upload logo'}</button>
+                  {user.logo && <button type="button" className="quiet" onClick={removeLogo} disabled={logoBusy}>Remove logo</button>}
+                  <input ref={logoInput} type="file" accept="image/png,image/jpeg,image/webp" hidden onChange={uploadLogo} />
+                </div>
+              </div>
+              <small className="muted">Saved right away. It is not part of the Save bar below.</small>
+              {user.logo && <LogoFit key={user.logo} url={user.logo} />}
+              <ul className="logo-tips muted">
+                <li>Best: a transparent PNG about <strong>800 × 240 px</strong>, wide (roughly 3:1).</li>
+                <li>At least 400 px wide. At most 2000 px per side and 2 MB.</li>
+                <li>It sits in the bottom-right corner of each camera photo people download, at 18% of the photo's width. Keep it simple and readable when small: no thin lines or tiny text.</li>
+              </ul>
+            </div>
           </div>
 
           <div role="tabpanel" id="panel-account" aria-labelledby="tab-account" hidden={tab !== 'account'} className="panel-stack">

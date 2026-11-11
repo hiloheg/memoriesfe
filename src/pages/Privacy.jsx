@@ -87,7 +87,7 @@ export default function Privacy() {
                 </tr>
                 <tr>
                   <td>Photographers</td>
-                  <td>What you put on your page: name, page address, tagline, bio, website, follow links, picture you upload, colours and patterns.</td>
+                  <td>What you put on your page: name, page address, tagline, bio, website, follow links, picture and logo you upload, colours and patterns.</td>
                   <td>To show your public page. It is public by your choice.</td>
                   <td>Contract (Art. 6(1)(b))</td>
                 </tr>
@@ -104,6 +104,12 @@ export default function Privacy() {
                   <td>The photographer decides (we are the processor, Art. 28)</td>
                 </tr>
                 <tr>
+                  <td>Guests who add photos</td>
+                  <td>Your Google account ID, your Google name, the photos you add and when you added them.</td>
+                  <td>To let you add photos to an event, show your name next to them, and count your uploads against the limit the event creator set.</td>
+                  <td>Your request to upload (Art. 6(1)(b)); for the photos, the event creator decides (we are the processor, Art. 28)</td>
+                </tr>
+                <tr>
                   <td>Everyone who visits</td>
                   <td>Your IP address and basic technical details (browser, time, page) in server logs.</td>
                   <td>To deliver the site, keep it secure and fix faults.</td>
@@ -118,7 +124,7 @@ export default function Privacy() {
               </tbody>
             </table>
           </div>
-          <p>We do not sell personal data, show ads, build advertising profiles or use analytics trackers. Guests do not need an account.</p>
+          <p>We do not sell personal data, show ads, build advertising profiles or use analytics trackers. Guests do not need an account to view photos. Adding photos needs a Google sign-in.</p>
         </section>
 
         <section id="storage">
@@ -131,8 +137,10 @@ export default function Privacy() {
               <thead><tr><th>Name</th><th>What it is for</th><th>Where, and how long</th></tr></thead>
               <tbody>
                 <tr><td><code>memories.idToken</code></td><td>Keeps a photographer signed in.</td><td>Session storage, until you close the tab or sign out</td></tr>
+                <tr><td><code>memories.guestToken</code></td><td>Keeps you signed in with Google while you add photos to an event.</td><td>Session storage, until you close the tab or sign out</td></tr>
                 <tr><td><code>memories.follow.*</code></td><td>Remembers which follow buttons you opened on a photographer's page, so you do not have to repeat them.</td><td>Local storage, until you clear your browser data</td></tr>
                 <tr><td><code>memories.eventPassword.*</code></td><td>Remembers the password you typed for a protected event.</td><td>Session storage, until you close the tab</td></tr>
+                <tr><td><code>memories.privacyAgreed</code></td><td>Remembers that you agreed to this policy on a photographer's page, so you are not asked again.</td><td>Local storage, until you clear your browser data</td></tr>
                 <tr><td><code>memories.consent</code></td><td>Remembers your choice about Google sign-in.</td><td>Local storage, until you clear your browser data</td></tr>
               </tbody>
             </table>
@@ -189,11 +197,26 @@ export default function Privacy() {
           </p>
         </section>
 
+        <section id="guest-photos">
+          <h2>Photos added by guests</h2>
+          <p>
+            When the event creator allows it, guests can sign in with Google and add their own photos to an event. The photos appear in the gallery straight away, with the guest's Google name shown next to them.
+            Anyone who can open the event can see that name.
+          </p>
+          <p>
+            Only the event creator can remove a guest's photo. We keep your Google name, account ID and upload times for as long as the event exists, and delete them with it.
+            To have your name and photos removed earlier, write to <Contact /> from the Google account you used.
+          </p>
+        </section>
+
         <section id="photos">
           <h2>If you are in a photo</h2>
           <p>
             Photos belong to the photographer who shared them. If you appear in a photo and want it removed, ask the photographer first.
             You can also write to us at <Contact /> with the link to the page and we will pass the request on, and remove the photo when the photographer cannot or will not.
+          </p>
+          <p>
+            When you download a photo you can crop and adjust it first. Editing happens on your device and the edited image is not uploaded anywhere. The logo that may be added to a photo is provided by the photographer.
           </p>
         </section>
 

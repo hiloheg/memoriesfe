@@ -47,7 +47,7 @@ export const EFFECTS = [
   { key: 'vignette', name: 'Vignette' },
 ]
 
-export const DEFAULT_BACKGROUND = { kind: 'default', value: '', pattern: 'none', effect: 'none' }
+export const DEFAULT_BACKGROUND = { kind: 'default', value: '', pattern: 'none', effect: 'none', frame: 'none', social: '' }
 
 /** 'light', 'dark', or 'neutral' (the plain default page, which follows the visitor's system theme). */
 export function toneOf(bg) {
@@ -99,8 +99,18 @@ export function patternStyle(key, tone) {
   }
 }
 
+/** Follow button color: --social and the text color on it. Nothing set means the page accent. */
+function socialVars(hex) {
+  if (!hex) return {}
+  return { '--social': hex, '--on-social': hex.toLowerCase() === '#ffffff' ? '#12161c' : '#ffffff' }
+}
+
 /** CSS variables for a themed page: accent color, and text/card colors that match a light or dark background. */
 export function themeVars(profile) {
+  return { ...baseThemeVars(profile), ...socialVars(profile.background?.social) }
+}
+
+function baseThemeVars(profile) {
   const accent = profile.accent
   const base = accentStyle(accent)
   const tone = toneOf(profile.background)

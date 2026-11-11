@@ -44,3 +44,22 @@ export function writeFollowed(slug, set) {
     /* storage unavailable: progress lasts until the page is closed */
   }
 }
+
+const AGREED = 'memories.privacyAgreed'
+
+/** Whether this visitor ticked the privacy box on a photographer's page (kept in this browser only). */
+export function readAgreed() {
+  try {
+    return localStorage.getItem(AGREED) === '1'
+  } catch {
+    return false
+  }
+}
+
+export function writeAgreed() {
+  try {
+    localStorage.setItem(AGREED, '1')
+  } catch {
+    /* storage unavailable: the choice lasts until the page is closed */
+  }
+}

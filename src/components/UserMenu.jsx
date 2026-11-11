@@ -43,13 +43,13 @@ export default function UserMenu() {
       </button>
       {open && (
         <div className="menu" role="menu">
-          <div className="menu-id">
+          <Link role="menuitem" to="/profile" className="menu-id menu-id-link" onClick={() => setOpen(false)} title="Edit your page">
             <Avatar user={user} size={44} />
             <div>
               <strong>{user.name !== 'null' ? user.name : 'Signed in'}</strong>
               <span>{user.email}</span>
             </div>
-          </div>
+          </Link>
           <Link role="menuitem" to="/profile" className="btn menu-item" onClick={() => setOpen(false)}>Edit your page</Link>
           <button role="menuitem" className="menu-item" onClick={logout}>Sign out</button>
         </div>

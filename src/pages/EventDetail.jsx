@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../auth.jsx'
 import { readError } from '../accents.js'
+import EventQr from '../components/EventQr.jsx'
+import GuestPhotos from '../components/GuestPhotos.jsx'
 import IconPicker from '../components/IconPicker.jsx'
 import { DetailSkeleton, Spinner } from '../components/Loaders.jsx'
 import Modal from '../components/Modal.jsx'
@@ -103,16 +105,29 @@ function EditEventForm({ event, onSave, onClose }) {
   )
 }
 
+const TABS = [
+  { key: 'event', label: 'Event' },
+  { key: 'photos', label: 'Guest photos' },
+  { key: 'share', label: 'Share' },
+]
+
+/** The limit shown in the box: what is saved, or 10 as a first suggestion while guest uploads are off. */
+const startLimit = (event) => (event.guestUploadsEnabled ? event.guestUploadLimit : event.guestUploadLimit || 10)
+
 /** Who can find the event, with its password and main-event choice. Nothing changes until Save is pressed. */
 function SettingsPanel({ event, onSave }) {
   const [visibility, setVisibility] = useState(event.visibility)
   const [password, setPassword] = useState(event.accessPassword ?? '')
   const [main, setMain] = useState(event.main)
+  const [guestOn, setGuestOn] = useState(event.guestUploadsEnabled)
+  const [guestLimit, setGuestLimit] = useState(startLimit(event))
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState(null)
 
   const passwordOk = visibility !== 'protected' || (password.length >= 4 && password.length <= 60)
-  const dirty = visibility !== event.visibility || main !== event.main
+  const limitOk = Number.isInteger(guestLimit) && guestLimit >= 0 && guestLimit <= 50
+  const guestChanged = guestOn !== event.guestUploadsEnabled || (guestOn && guestLimit !== event.guestUploadLimit)
+  const dirty = visibility !== event.visibility || main !== event.main || guestChanged
     || (visibility === 'protected' && password !== (event.accessPassword ?? ''))
 
   function pick(next) {
@@ -126,13 +141,15 @@ function SettingsPanel({ event, onSave }) {
     setVisibility(event.visibility)
     setPassword(event.accessPassword ?? '')
     setMain(event.main)
+    setGuestOn(event.guestUploadsEnabled)
+    setGuestLimit(startLimit(event))
     setError(null)
   }
   async function save(e) {
     e.preventDefault()
     setBusy(true)
     setError(null)
-    const message = await onSave({ visibility, password, main })
+    const message = await onSave({ visibility, password, main, guestOn, guestLimit })
     setBusy(false)
     if (message) setError(message)
   }
@@ -166,11 +183,27 @@ function SettingsPanel({ event, onSave }) {
             <span className="muted">Your page shows only this event and hides all your other events.</span>
           </span>
         </label>
+        <label className="check main-toggle">
+          <input type="checkbox" checked={guestOn} onChange={(e) => setGuestOn(e.target.checked)} />
+          <span>
+            <strong>Let guests upload photos</strong>
+            <span className="muted">Guests sign in with Google, then add their own photos to this event. They show up straight away, with the guest's name.</span>
+          </span>
+        </label>
+        {guestOn && (
+          <label className="guest-limit">
+            <span className="field-label">Photos each guest can add (0 to 50)</span>
+            <input type="number" inputMode="numeric" min={0} max={50} step={1} value={Number.isNaN(guestLimit) ? '' : guestLimit}
+              onChange={(e) => setGuestLimit(e.target.value === '' ? NaN : Number(e.target.value))} aria-invalid={!limitOk} />
+            {!limitOk && <small className="error">Choose a whole number from 0 to 50.</small>}
+            {limitOk && guestLimit === 0 && <small className="muted">With 0, guests cannot add anything.</small>}
+          </label>
+        )}
       </fieldset>
       {error && <p role="alert" className="error">{error}</p>}
       <div className="settings-actions">
         <button type="button" onClick={discard} disabled={!dirty || busy}>Discard</button>
-        <button type="submit" className="primary" disabled={!dirty || !passwordOk || busy}>{busy && <Spinner />}{busy ? 'Saving…' : 'Save changes'}</button>
+        <button type="submit" className="primary" disabled={!dirty || !passwordOk || (guestOn && !limitOk) || busy}>{busy && <Spinner />}{busy ? 'Saving…' : 'Save changes'}</button>
       </div>
       {dirty && !busy && <p className="muted unsaved" role="status">You have unsaved changes.</p>}
     </form>
@@ -188,6 +221,9 @@ export default function EventDetail() {
   const [error, setError] = useState(null)
   const [linkCopied, setLinkCopied] = useState(false)
   const [editing, setEditing] = useState(false)
+  const [params, setParams] = useSearchParams()
+  const tab = TABS.some((t) => t.key === params.get('tab')) ? params.get('tab') : 'event' // kept in the address, so a refresh stays on the same tab
+  const setTab = (next) => setParams(next === 'event' ? {} : { tab: next }, { replace: true })
   const [pending, setPending] = useState(null) // which action is waiting for the backend
 
   const load = useCallback(() => {
@@ -273,6 +309,9 @@ export default function EventDetail() {
       message = await call('/visibility', 'PUT', { visibility: draft.visibility, password: draft.visibility === 'protected' ? draft.password : undefined })
     }
     if (!message && draft.main && !current.main) message = await call('/main', 'PUT')
+    if (!message && (draft.guestOn !== current.guestUploadsEnabled || (draft.guestOn && draft.guestLimit !== current.guestUploadLimit))) {
+      message = await call('/guest-uploads', 'PUT', { enabled: draft.guestOn, limit: draft.guestOn ? draft.guestLimit : current.guestUploadLimit })
+    }
     await load()
     return message
   }
@@ -322,7 +361,31 @@ export default function EventDetail() {
       </header>
       {error && <p role="alert" className="error" style={{ marginBottom: 16 }}>{error}</p>}
 
-      <div className="event-layout two">
+      <div className="tabs-bar" role="tablist" aria-label="Event" onKeyDown={(e) => {
+        const i = TABS.findIndex((t) => t.key === tab)
+        if (e.key === 'ArrowRight') setTab(TABS[(i + 1) % TABS.length].key)
+        if (e.key === 'ArrowLeft') setTab(TABS[(i - 1 + TABS.length) % TABS.length].key)
+      }}>
+        {TABS.map((t) => (
+          <button key={t.key} type="button" role="tab" id={`tab-${t.key}`} aria-selected={tab === t.key} aria-controls={`panel-${t.key}`}
+            tabIndex={tab === t.key ? 0 : -1} className="tab-btn" onClick={() => setTab(t.key)}>{t.label}</button>
+        ))}
+      </div>
+
+      {tab === 'share' && (
+        <div role="tabpanel" id="panel-share" aria-labelledby="tab-share" className="share-panel">
+          <p className="muted">Print this code or save it as an image for tables, signs and invitations. Guests scan it to open the photos of this event.</p>
+          <EventQr event={event} />
+        </div>
+      )}
+
+      {tab === 'photos' && (
+        <div role="tabpanel" id="panel-photos" aria-labelledby="tab-photos">
+          <GuestPhotos eventId={id} uploadsOn={event.guestUploadsEnabled && event.guestUploadLimit > 0} onOpenSettings={() => setTab('event')} />
+        </div>
+      )}
+
+      <div role="tabpanel" id="panel-event" aria-labelledby="tab-event" hidden={tab !== 'event'} className="event-layout two">
         <div className="event-main">
           <div className="section-title">
             <h2>Cameras</h2>
@@ -365,7 +428,7 @@ export default function EventDetail() {
         </div>
 
         <aside className="event-side">
-        <SettingsPanel key={`${event.visibility}|${event.accessPassword}|${event.main}`} event={event} onSave={saveSettings} />
+        <SettingsPanel key={`${event.visibility}|${event.accessPassword}|${event.main}|${event.guestUploadsEnabled}|${event.guestUploadLimit}`} event={event} onSave={saveSettings} />
         </aside>
       </div>
       <Modal open={adding} onClose={() => setAdding(false)} title="Add a camera">

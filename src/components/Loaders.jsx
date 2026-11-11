@@ -95,7 +95,7 @@ export function DetailSkeleton() {
  * Photo tile that only starts downloading its image when it is about to scroll into view,
  * so a long gallery never fetches everything at once.
  */
-export function LazyPhoto({ src, label, onOpen }) {
+export function LazyPhoto({ src, fallback, label, onOpen }) {
   const [near, setNear] = useState(false)
   const ref = useRef(null)
   useEffect(() => {
@@ -109,23 +109,25 @@ export function LazyPhoto({ src, label, onOpen }) {
   }, [near])
   return (
     <button ref={ref} className="photo" onClick={onOpen} aria-label={label}>
-      {near && <FadeImage src={src} />}
+      {near && <FadeImage src={src} fallback={fallback} />}
     </button>
   )
 }
 
 /** Image that fades in once it has loaded; the box behind it shimmers until then. */
-export function FadeImage({ src, alt = '', onLoaded, ...rest }) {
+export function FadeImage({ src, fallback, alt = '', onLoaded, ...rest }) {
   const [loaded, setLoaded] = useState(false)
+  const [broken, setBroken] = useState(false) // the small copy failed: show the original instead
   const done = () => { setLoaded(true); onLoaded?.() }
   return (
     <img
       {...rest}
-      src={src}
+      src={broken && fallback ? fallback : src}
       alt={alt}
       className={loaded ? 'fade-img loaded' : 'fade-img'}
       ref={(el) => { if (el?.complete && el.naturalWidth > 0 && !loaded) done() }}
       onLoad={done}
+      onError={() => { if (fallback && !broken) setBroken(true) }}
     />
   )
 }

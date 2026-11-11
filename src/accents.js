@@ -8,6 +8,13 @@ export const ACCENTS = [
   { name: 'Green', value: '#15803d' },
 ]
 
+/** Colors for the follow buttons: the page accent (empty value), black, white, or one of the accents. */
+export const SOCIAL_COLORS = [
+  { name: 'Black', value: '#12161c' },
+  { name: 'White', value: '#ffffff' },
+  ...ACCENTS,
+]
+
 /** CSS variables that re-theme a page with the chosen accent. */
 export function accentStyle(color) {
   return {

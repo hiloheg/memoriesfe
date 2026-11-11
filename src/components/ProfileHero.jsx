@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { Avatar } from './UserMenu.jsx'
 
 function hostOf(url) {
@@ -8,16 +9,25 @@ function hostOf(url) {
   }
 }
 
-/** Top of a photographer page: big picture, name, tagline, bio and links. Used on the public page and in the editor preview. */
-export default function ProfileHero({ profile }) {
+/**
+ * Top of a photographer page: big picture, name, tagline, bio and links. Used on the public page and in the editor preview.
+ * With `href`, the picture and the name link there (an event page links back to the photographer's page).
+ */
+export default function ProfileHero({ profile, href }) {
   const { name, tagline, bio, website, picture } = profile
   return (
     <header className="profile-hero">
-      <span className="profile-avatar">
-        <Avatar user={{ name, email: name, picture }} size={132} />
-      </span>
+      {href ? (
+        <Link to={href} className="profile-avatar profile-avatar-link" aria-label={`${name || 'Photographer'}: all events`}>
+          <Avatar user={{ name, email: name, picture }} size={132} />
+        </Link>
+      ) : (
+        <span className="profile-avatar">
+          <Avatar user={{ name, email: name, picture }} size={132} />
+        </span>
+      )}
       <div className="profile-text">
-        <h1>{name || 'Your name'}</h1>
+        <h1>{href ? <Link to={href} className="profile-name-link">{name}</Link> : name || 'Your name'}</h1>
         {tagline && <p className="profile-tagline">{tagline}</p>}
         {bio && <p className="profile-bio">{bio}</p>}
         {website && (

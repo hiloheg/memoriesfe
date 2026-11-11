@@ -26,7 +26,10 @@
 .lp-links a { padding: 8px 14px; border-radius: 99px; color: var(--lp-soft); text-decoration: none; font-weight: 600; }
 .lp-links a:hover { color: var(--lp-ink); background: var(--lp-line); }
 .lp-signin { position: relative; display: flex; align-items: center; min-height: 40px; border-radius: 99px; }
-.lp-signin > div { color-scheme: normal; }
+/* Google's button lives in an iframe. If the iframe's colour scheme differs from the page's, the browser paints an opaque
+   white box behind it (most visible while it waits for sign-in), so the wrapper must follow the theme the button uses. */
+.lp-signin > div, .lp-final-cta > div { color-scheme: light; border-radius: 99px; overflow: hidden; }
+@media (prefers-color-scheme: dark) { .lp-signin > div, .lp-final-cta > div { color-scheme: dark; } }
 .lp-signin.nudge::after { content: ''; position: absolute; inset: -6px; border-radius: 99px; border: 2.5px solid var(--lp-teal); pointer-events: none; animation: lp-nudge 0.8s ease-out 3; }
 .lp-messages { max-width: 1200px; margin: 12px auto 0; padding: 0 16px; display: grid; gap: 8px; }
 

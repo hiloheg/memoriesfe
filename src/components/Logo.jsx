@@ -16,7 +16,6 @@ export default function Logo({ label = true }) {
         ı<Sparkle className="logo-spark logo-spark-main" />
       </span>
       <span aria-hidden="true">memories</span>
-      <Sparkle className="logo-spark logo-spark-small" />
     </span>
   )
 }

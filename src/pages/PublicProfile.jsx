@@ -5,10 +5,11 @@ import Backdrop from '../components/Backdrop.jsx'
 import Logo from '../components/Logo.jsx'
 import { HeroSkeleton, TilesSkeleton, TopBar } from '../components/Loaders.jsx'
 import PhotoStream from '../components/PhotoStream.jsx'
+import { frameClass } from '../frames.js'
 import ProfileHero from '../components/ProfileHero.jsx'
 import { formatDay } from '../dates.js'
 import { EventBadge } from '../eventIcons.jsx'
-import { readFollowed, writeFollowed } from '../social.js'
+import { readAgreed, readFollowed, writeAgreed, writeFollowed } from '../social.js'
 
 const API_URL = import.meta.env.VITE_API_URL
 
@@ -29,29 +30,53 @@ function Lock() {
   )
 }
 
-/** The visitor opens every follow button; the events stay locked until the last one. */
-function FollowPanel({ name, links, followed, onOpen }) {
+/** What a visitor must do before the photos show: agree to the privacy policy first, then open every follow button (if asked). */
+function GatePanel({ name, links, followed, onOpen, agreed, onAgree }) {
   const done = links.filter((l) => followed.has(l.url)).length
+  const first = name.split(' ')[0]
+  const hasLinks = links.length > 0
   return (
-    <section className="follow" aria-labelledby="follow-title">
-      <h2 id="follow-title">Follow {name.split(' ')[0]} to see the photos</h2>
-      <p className="muted" aria-live="polite">
-        {done === 0 ? 'Open each button below. The photos unlock after the last one.' : `${done} of ${links.length} opened. ${links.length - done} to go.`}
-      </p>
-      <ul className="follow-list">
-        {links.map((l) => {
-          const isDone = followed.has(l.url)
-          return (
-            <li key={l.id}>
-              <a className={isDone ? 'follow-btn done' : 'follow-btn'} href={l.url} target="_blank" rel="noopener noreferrer" onClick={() => onOpen(l.url)}>
-                <span className="follow-check">{isDone && <Check />}</span>
-                {l.label}
-                {isDone && <span className="sr-only"> (opened)</span>}
-              </a>
-            </li>
-          )
-        })}
-      </ul>
+    <section className={agreed ? 'follow gate agreed' : 'follow gate'} aria-labelledby="follow-title">
+      <h2 id="follow-title">{hasLinks ? `Follow ${first} to see the photos` : `Agree to see ${first}'s photos`}</h2>
+
+      <label className="gate-agree">
+        {hasLinks && <span className="gate-step" aria-hidden="true">1</span>}
+        <input type="checkbox" checked={agreed} onChange={(e) => e.target.checked && onAgree()} />
+        <span className="gate-box" aria-hidden="true"><Check /></span>
+        <span className="gate-agree-text">
+          <strong>{agreed ? 'Privacy policy accepted' : 'Agree to the privacy policy'}</strong>
+          <small>
+            {agreed ? 'You will not be asked again on this device.' : <>I have read the <Link to="/privacy" target="_blank" rel="noopener noreferrer">privacy policy</Link> and agree to how my data is handled.</>}
+          </small>
+        </span>
+      </label>
+
+      {hasLinks && (
+        <div className={agreed ? 'gate-follow' : 'gate-follow waiting'}>
+          <p className="gate-follow-head">
+            <span className="gate-step" aria-hidden="true">2</span>
+            <span aria-live="polite">
+              {!agreed ? 'Follow buttons open after you agree.' : done === 0 ? 'Open each button below. The photos unlock after the last one.' : `${done} of ${links.length} opened. ${links.length - done} to go.`}
+            </span>
+          </p>
+          <ul className="follow-list">
+            {links.map((l) => {
+              const isDone = followed.has(l.url)
+              return (
+                <li key={l.id}>
+                  <a className={isDone ? 'follow-btn done' : 'follow-btn'} href={agreed ? l.url : undefined} target="_blank" rel="noopener noreferrer"
+                    role={agreed ? undefined : 'link'} aria-disabled={!agreed || undefined} tabIndex={agreed ? undefined : -1}
+                    onClick={(e) => { if (!agreed) return e.preventDefault(); onOpen(l.url) }}>
+                    <span className="follow-check">{isDone && <Check />}</span>
+                    {l.label}
+                    {isDone && <span className="sr-only"> (opened)</span>}
+                  </a>
+                </li>
+              )
+            })}
+          </ul>
+        </div>
+      )}
     </section>
   )
 }
@@ -61,7 +86,7 @@ function LockedTiles({ count = 3 }) {
     <ul className="events" aria-hidden="true">
       {Array.from({ length: count }, (_, i) => i).map((i) => (
         <li key={i}>
-          <div className="event-tile locked"><Lock /><span>Unlocks when you follow</span></div>
+          <div className="event-tile locked"><Lock /><span>Unlocks after the steps above</span></div>
         </li>
       ))}
     </ul>
@@ -74,6 +99,7 @@ function ProfilePage({ slug, eventSlug }) {
   const [error, setError] = useState(null)
   const [followed, setFollowed] = useState(() => readFollowed(slug))
   const [justUnlocked, setJustUnlocked] = useState(false)
+  const [agreed, setAgreed] = useState(readAgreed)
 
   useEffect(() => {
     document.title = 'Photos'
@@ -87,27 +113,36 @@ function ProfilePage({ slug, eventSlug }) {
   if (!page) return <main className="gallery" aria-busy="true"><TopBar /><HeroSkeleton /><TilesSkeleton count={3} /></main>
 
   const gated = page.followGate && page.links.length > 0
-  const locked = gated && !page.links.every((l) => followed.has(l.url))
+  const followsDone = !gated || page.links.every((l) => followed.has(l.url))
+  const locked = !followsDone || !agreed
 
   function open(url) {
     const next = new Set(followed).add(url)
     setFollowed(next)
     writeFollowed(slug, next)
-    if (locked && page.links.every((l) => next.has(l.url))) setJustUnlocked(true)
+    if (locked && agreed && page.links.every((l) => next.has(l.url))) setJustUnlocked(true)
+  }
+
+  function agree() {
+    setAgreed(true)
+    writeAgreed()
+    if (followsDone) setJustUnlocked(true)
   }
 
   return (
-    <div className="profile-bg" style={themeVars(page)}>
+    <div className={`profile-bg ${frameClass(page.background?.frame)}`} style={themeVars(page)}>
     <Backdrop bg={page.background} />
     <main className="gallery profile-page">
-      <ProfileHero profile={page} />
+      <ProfileHero profile={page} href={eventSlug && !page.featured ? `/${page.slug}` : undefined} />
 
-      {gated && locked && <FollowPanel name={page.name} links={page.links} followed={followed} onOpen={open} />}
+      {locked && <GatePanel name={page.name} links={gated ? page.links : []} followed={followed} onOpen={open} agreed={agreed} onAgree={agree} />}
 
       {!locked && page.links.length > 0 && (
-        <div className="profile-links profile-follow-inline">
-          {page.links.map((l) => <a key={l.id} className="chip" href={l.url} target="_blank" rel="noopener noreferrer">{l.label}</a>)}
-        </div>
+        <section className="social-card" aria-label={`Follow ${page.name}`}>
+          <div className="profile-links">
+            {page.links.map((l) => <a key={l.id} className="chip" href={l.url} target="_blank" rel="noopener noreferrer">{l.label}</a>)}
+          </div>
+        </section>
       )}
 
       {!locked && (eventSlug || page.featured) ? (
