@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { PACKS, confirmSummary, daysLeft, describePlan, eventStatus, expiryDate, lockedMessage, perEvent, planToSpend, shouldResumePolling, shouldStopPolling, shouldWarn } from './credits.js'
+import { PACKS, confirmSummary, createWatcher, isStale, daysLeft, describePlan, eventStatus, expiryDate, lockedMessage, perEvent, planToSpend, shouldResumePolling, shouldStopPolling, shouldWarn } from './credits.js'
 
 test('the three packs and what each event costs', () => {
   assert.deepEqual(PACKS.map((p) => [p.pack, p.credits, p.price]), [[1, 1, 19], [5, 5, 85], [10, 10, 150]])
@@ -93,4 +93,69 @@ test('coming back from the checkout tab starts the check again, for up to half a
   assert.equal(shouldResumePolling(opened, opened + 5 * 60000), true)
   assert.equal(shouldResumePolling(opened, opened + 30 * 60000), true)
   assert.equal(shouldResumePolling(opened, opened + 31 * 60000), false)
+})
+
+// A fake clock and timer, so the watcher can be driven step by step.
+function fakeTimers() {
+  let nextId = 1
+  const active = new Map()
+  let time = 0
+  return {
+    now: () => time,
+    advance: (ms) => { time += ms },
+    setTimer: (fn) => { const id = nextId++; active.set(id, fn); return id },
+    clearTimer: (id) => { active.delete(id) },
+    active,
+    tick: async () => { for (const fn of [...active.values()]) await fn() },
+  }
+}
+
+test('the watcher stops by itself when the value changes', async () => {
+  const t = fakeTimers()
+  const done = []
+  let value = 2
+  const w = createWatcher({ read: async () => value, onDone: (changed) => done.push(changed), ...t })
+  w.start(2)
+  await t.tick()
+  assert.equal(t.active.size, 1, 'still waiting: nothing changed yet')
+  value = 3
+  await t.tick()
+  assert.equal(t.active.size, 0)
+  assert.deepEqual(done, [true])
+})
+
+test('the watcher gives up after a minute', async () => {
+  const t = fakeTimers()
+  const done = []
+  const w = createWatcher({ read: async () => 2, onDone: (changed) => done.push(changed), ...t })
+  w.start(2)
+  t.advance(61000)
+  await t.tick()
+  assert.equal(t.active.size, 0)
+  assert.deepEqual(done, [false])
+})
+
+test('starting the watcher again never leaves an old timer running', async () => {
+  const t = fakeTimers()
+  const w = createWatcher({ read: async () => 2, ...t })
+  w.start(2)
+  w.start(2)
+  w.start(2)
+  assert.equal(t.active.size, 1)
+  w.stop()
+  assert.equal(t.active.size, 0)
+})
+
+test('a failed read counts as no change and the watcher keeps going', async () => {
+  const t = fakeTimers()
+  const w = createWatcher({ read: async () => { throw new Error('offline') }, ...t })
+  w.start(2)
+  await t.tick()
+  assert.equal(t.active.size, 1)
+})
+
+test('coming back to the tab refreshes the balance only when it is older than 30 seconds', () => {
+  assert.equal(isStale(null, 1000), true, 'never loaded')
+  assert.equal(isStale(1000, 1000 + 29000), false)
+  assert.equal(isStale(1000, 1000 + 30000), true)
 })

@@ -94,3 +94,43 @@ export function lockedMessage(message) {
 export function shouldResumePolling(openedAt, now = Date.now()) {
   return openedAt !== null && now - openedAt <= 30 * 60000
 }
+
+/** True when the balance was loaded 30 seconds ago or more (or never), so coming back to the tab is worth a refresh. */
+export function isStale(loadedAt, now = Date.now(), maxAgeMs = 30000) {
+  return loadedAt === null || now - loadedAt >= maxAgeMs
+}
+
+/**
+ * Checks `read()` every few seconds until it returns something other than `before` (the purchase arrived) or a minute has passed.
+ * Only one loop runs at a time: `start` stops the previous one first, and a loop that was replaced while waiting for an answer does nothing.
+ * A failed read counts as "no change yet". `onDone(changed)` is called once when a loop ends by itself.
+ */
+export function createWatcher({ read, onDone = () => {}, everyMs = 3000, maxMs = 60000, now = Date.now, setTimer = setInterval, clearTimer = clearInterval }) {
+  let id = null
+  function stop() {
+    if (id !== null) {
+      clearTimer(id)
+      id = null
+    }
+  }
+  function start(before) {
+    stop()
+    const started = now()
+    const mine = setTimer(async () => {
+      let after = before
+      try {
+        const value = await read()
+        if (value !== null && value !== undefined) after = value
+      } catch {
+        /* offline or server error: try again on the next round */
+      }
+      if (id !== mine) return // stopped or replaced while waiting for the answer
+      if (after !== before || now() - started >= maxMs) {
+        stop()
+        onDone(after !== before)
+      }
+    }, everyMs)
+    id = mine
+  }
+  return { start, stop }
+}
