@@ -22,7 +22,7 @@ export default function LegalFooter() {
           <button type="button" className="linklike" onClick={reopenConsent}>Cookie settings</button>
         </nav>
         <a className="legal-sal" href={LEGAL.salUrl} target="_blank" rel="noopener noreferrer" title={LEGAL.salLabel} aria-label={`${LEGAL.salLabel} (opens in a new tab)`}>
-          {sal ? <img src={sal} width="137" height="34" alt="" /> : 'Alternative dispute resolution (SAL)'}
+          {sal ? <img src={sal} width="186" height="46" alt="" /> : 'Alternative dispute resolution (SAL)'}
         </a>
       </div>
       <LegalIdentity />

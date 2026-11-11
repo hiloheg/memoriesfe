@@ -1087,7 +1087,7 @@ button.linklike:hover { color: var(--accent-strong); background: none; }
 .legal-links a, .legal-links button { color: var(--ink-soft); text-decoration: none; font: inherit; padding: 2px 0; }
 .legal-links a:hover, .legal-links button:hover { color: var(--accent); text-decoration: underline; }
 .legal-sal { display: inline-flex; align-items: center; color: var(--ink-soft); }
-.legal-sal img { display: block; height: 34px; width: auto; border-radius: 6px; }
+.legal-sal img { display: block; height: 46px; width: auto; border-radius: 6px; }
 .legal-id { font-style: normal; display: flex; flex-direction: column; gap: 2px; }
 .legal-footer .legal-id { flex-direction: row; flex-wrap: wrap; gap: 2px 16px; max-width: 90ch; font-size: 0.75rem; opacity: 0.85; }
 @media (max-width: 560px) { .legal-footer { padding-left: 16px; padding-right: 16px; } }
