@@ -16,6 +16,13 @@ export function perEvent(pack) {
   return round2(p.price / p.credits)
 }
 
+/** What a pack saves against buying the same number of credits one at a time: euro and whole percent. */
+export function savings(pack) {
+  const p = PACKS.find((x) => x.pack === pack)
+  const amount = round2(PACKS[0].price * p.credits - p.price)
+  return { amount, percent: Math.round((amount / (PACKS[0].price * p.credits)) * 100) }
+}
+
 /** What a plan gives: photos, days online, and how many cameras (null = no limit). */
 export function describePlan(plan) {
   return plan === 'trial'

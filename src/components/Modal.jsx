@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react'
  * Dialog built on the native dialog element: traps focus, closes with Esc or a click outside.
  * Its content is only rendered while open, so forms start fresh every time.
  */
-export default function Modal({ open, onClose, title, children }) {
+export default function Modal({ open, onClose, title, wide = false, children }) {
   const ref = useRef(null)
 
   useEffect(() => {
@@ -17,7 +17,7 @@ export default function Modal({ open, onClose, title, children }) {
   return (
     <dialog
       ref={ref}
-      className="modal"
+      className={wide ? 'modal modal-wide' : 'modal'}
       aria-labelledby="modal-title"
       onClose={onClose}
       onClick={(e) => { if (e.target === ref.current) onClose() }}
