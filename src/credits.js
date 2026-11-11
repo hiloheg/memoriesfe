@@ -70,3 +70,17 @@ export function confirmSummary({ plan, eventDate, today = new Date(), balanceTot
     note: 'The online-until date is fixed once the credit is used. You can still change the event name and icon later.',
   }
 }
+
+export function formatLongDate(value) {
+  return longDate.format(new Date(value))
+}
+
+/** What the dashboard says about how long an event stays online; null for an event without a plan. */
+export function eventStatus(event, now = new Date()) {
+  if (event.purgedAt) return { kind: 'purged', text: `Photos deleted on ${formatLongDate(event.purgedAt)}` }
+  if (event.expired) return { kind: 'expired', text: `Expired. Photos are deleted on ${formatLongDate(event.purgeAfter)}` }
+  if (!event.plan || !event.expiresAt) return null
+  const days = daysLeft(event.expiresAt, now)
+  if (shouldWarn(event.plan, days)) return { kind: 'warning', text: `Expires in ${days} ${days === 1 ? 'day' : 'days'}. Download what you need` }
+  return { kind: 'active', text: `Online for ${days} more ${days === 1 ? 'day' : 'days'}` }
+}

@@ -4,6 +4,7 @@ import { useAuth } from '../auth.jsx'
 import NewEventDialog from '../components/NewEventDialog.jsx'
 import { Avatar } from '../components/UserMenu.jsx'
 import { TilesSkeleton } from '../components/Loaders.jsx'
+import { eventStatus } from '../credits.js'
 import { formatDay } from '../dates.js'
 import { EventBadge } from '../eventIcons.jsx'
 
@@ -130,6 +131,10 @@ export default function Dashboard() {
                   </span>
                 )}
                 <strong>{ev.name}</strong>
+                {(() => {
+                  const status = eventStatus(ev)
+                  return status && <small className={`tile-status ${status.kind}`}>{status.text}</small>
+                })()}
                 <span className="tile-meta">
                   <small>{formatDay(ev.eventDate)}</small>
                   <span className={ev.cameraCount || ev.cameraAccessExpired ? 'pill' : 'pill pill-warn'}>

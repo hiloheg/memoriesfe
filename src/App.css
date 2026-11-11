@@ -1065,3 +1065,8 @@ button.linklike:hover { color: var(--accent-strong); background: none; }
 .confirm-title { margin: 0; font-family: var(--display); font-size: 1.25rem; font-weight: 700; }
 .confirm-lines { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; }
 .confirm-lines li { padding: 8px 12px; border-radius: var(--radius); background: var(--mist); }
+
+/* How long an event stays online, on the event tiles. */
+.tile-status { display: block; color: var(--ink-soft); }
+.tile-status.warning, .tile-status.expired { color: var(--danger); font-weight: 600; }
+.tile-status.purged { font-style: italic; }

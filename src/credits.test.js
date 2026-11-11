@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { PACKS, confirmSummary, daysLeft, describePlan, expiryDate, perEvent, planToSpend, shouldStopPolling, shouldWarn } from './credits.js'
+import { PACKS, confirmSummary, daysLeft, describePlan, eventStatus, expiryDate, perEvent, planToSpend, shouldStopPolling, shouldWarn } from './credits.js'
 
 test('the three packs and what each event costs', () => {
   assert.deepEqual(PACKS.map((p) => [p.pack, p.credits, p.price]), [[1, 1, 19], [5, 5, 85], [10, 10, 150]])
@@ -63,4 +63,20 @@ test('a purchased credit is spent before the free one', () => {
   assert.equal(planToSpend({ trial: 1, full: 2, total: 3 }), 'full')
   assert.equal(planToSpend({ trial: 1, full: 0, total: 1 }), 'trial')
   assert.equal(planToSpend({ trial: 0, full: 0, total: 0 }), null)
+})
+
+test('event status: online, warning, expired and purged', () => {
+  const now = new Date('2026-12-01T10:00:00Z')
+  const day = (n) => new Date(now.getTime() + n * 86400000).toISOString()
+  const base = { plan: 'full', purgedAt: null, expired: false }
+  assert.deepEqual(eventStatus({ ...base, expiresAt: day(41), purgeAfter: day(55) }, now), { kind: 'active', text: 'Online for 41 more days' })
+  assert.deepEqual(eventStatus({ ...base, expiresAt: day(1), purgeAfter: day(15) }, now).kind, 'warning')
+  assert.equal(eventStatus({ ...base, expiresAt: day(1), purgeAfter: day(15) }, now).text, 'Expires in 1 day. Download what you need')
+  assert.equal(eventStatus({ ...base, plan: 'trial', expiresAt: day(10), purgeAfter: day(24) }, now).kind, 'active', 'a trial event warns only in its last 7 days')
+  const expired = eventStatus({ ...base, expired: true, expiresAt: day(-1), purgeAfter: new Date('2026-12-14T00:00:00Z').toISOString() }, now)
+  assert.equal(expired.kind, 'expired')
+  assert.equal(expired.text, 'Expired. Photos are deleted on 14 Dec 2026')
+  const purged = eventStatus({ ...base, expired: true, expiresAt: day(-20), purgeAfter: day(-6), purgedAt: new Date('2026-11-20T03:30:00Z').toISOString() }, now)
+  assert.deepEqual(purged, { kind: 'purged', text: 'Photos deleted on 20 Nov 2026' })
+  assert.equal(eventStatus({ plan: null, expiresAt: null, purgedAt: null, expired: false }, now), null, 'an event without a plan shows nothing')
 })

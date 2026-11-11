@@ -2,11 +2,13 @@ import { useCallback, useEffect, useState } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../auth.jsx'
 import { readError } from '../accents.js'
+import { useCredits } from '../components/CreditsContext.jsx'
 import EventQr from '../components/EventQr.jsx'
 import GuestPhotos from '../components/GuestPhotos.jsx'
 import IconPicker from '../components/IconPicker.jsx'
 import { DetailSkeleton, Spinner } from '../components/Loaders.jsx'
 import Modal from '../components/Modal.jsx'
+import { eventStatus } from '../credits.js'
 import { accessUntil, formatDay } from '../dates.js'
 import { EventBadge } from '../eventIcons.jsx'
 
@@ -214,6 +216,7 @@ function SettingsPanel({ event, onSave }) {
 export default function EventDetail() {
   const { id } = useParams()
   const { apiFetch } = useAuth()
+  const { openBuy } = useCredits()
   const navigate = useNavigate()
   const [data, setData] = useState(null)
   const [adding, setAdding] = useState(false)
@@ -337,6 +340,9 @@ export default function EventDetail() {
   if (error && !data) return <p role="alert" className="error">{error}</p>
   if (!data) return <DetailSkeleton />
   const { event, cameras } = data
+  const status = eventStatus(event)
+  const atCameraLimit = cameras.length >= event.maxCameras
+  const closed = event.expired || event.cameraAccessExpired
 
   return (
     <section>
@@ -359,6 +365,9 @@ export default function EventDetail() {
           <button type="button" onClick={() => { navigator.clipboard?.writeText(event.shareUrl); setLinkCopied(true) }}>{linkCopied ? 'Link copied' : 'Copy link'}</button>
         </div>
       </header>
+      {status && (
+        <p className={status.kind === 'active' ? 'notice-info' : 'notice-warn'} role="status" style={{ marginBottom: 16 }}>{status.text}</p>
+      )}
       {error && <p role="alert" className="error" style={{ marginBottom: 16 }}>{error}</p>}
 
       <div className="tabs-bar" role="tablist" aria-label="Event" onKeyDown={(e) => {
@@ -396,10 +405,16 @@ export default function EventDetail() {
           ) : (
             <p className="notice-info">Camera logins work until the end of {formatDay(accessUntil(event.eventDate))}, 3 days after the event.</p>
           )}
+          {!closed && atCameraLimit && (
+            <p className="notice-info" role="status">
+              Trial events support 1 camera. Buy a pack to create full events with more cameras.{' '}
+              <button type="button" className="primary" onClick={openBuy}>Buy credits</button>
+            </p>
+          )}
           <ul className="event-list">
-            {!event.cameraAccessExpired && (
+            {!closed && (
               <li>
-                <button type="button" className="event-row new-row" onClick={() => setAdding(true)}>
+                <button type="button" className="event-row new-row" onClick={() => setAdding(true)} disabled={atCameraLimit}>
                   <span className="new-plus" aria-hidden="true">+</span>
                   <span>Add camera</span>
                 </button>
