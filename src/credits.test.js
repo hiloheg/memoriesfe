@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { PACKS, confirmSummary, daysLeft, describePlan, eventStatus, expiryDate, lockedMessage, perEvent, planToSpend, shouldStopPolling, shouldWarn } from './credits.js'
+import { PACKS, confirmSummary, daysLeft, describePlan, eventStatus, expiryDate, lockedMessage, perEvent, planToSpend, shouldResumePolling, shouldStopPolling, shouldWarn } from './credits.js'
 
 test('the three packs and what each event costs', () => {
   assert.deepEqual(PACKS.map((p) => [p.pack, p.credits, p.price]), [[1, 1, 19], [5, 5, 85], [10, 10, 150]])
@@ -85,4 +85,12 @@ test('a locked answer from the server becomes a plain message', () => {
   assert.equal(lockedMessage('locked: Buy any pack to change the look of your page'), 'Buy any pack to change the look of your page')
   assert.equal(lockedMessage('Something else'), null)
   assert.equal(lockedMessage(undefined), null)
+})
+
+test('coming back from the checkout tab starts the check again, for up to half an hour after opening it', () => {
+  const opened = 1_000_000
+  assert.equal(shouldResumePolling(null, opened), false, 'no purchase was started')
+  assert.equal(shouldResumePolling(opened, opened + 5 * 60000), true)
+  assert.equal(shouldResumePolling(opened, opened + 30 * 60000), true)
+  assert.equal(shouldResumePolling(opened, opened + 31 * 60000), false)
 })

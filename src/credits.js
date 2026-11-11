@@ -89,3 +89,8 @@ export function eventStatus(event, now = new Date()) {
 export function lockedMessage(message) {
   return typeof message === 'string' && message.startsWith('locked:') ? message.slice('locked:'.length).trim() : null
 }
+
+/** The buyer is often away in the checkout tab for several minutes, so coming back checks for the new credits again for up to 30 minutes after it was opened. */
+export function shouldResumePolling(openedAt, now = Date.now()) {
+  return openedAt !== null && now - openedAt <= 30 * 60000
+}

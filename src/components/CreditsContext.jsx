@@ -1,7 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { useAuth } from '../auth.jsx'
-import { shouldStopPolling } from '../credits.js'
+import { shouldResumePolling, shouldStopPolling } from '../credits.js'
 import BuyCreditsDialog from './BuyCreditsDialog.jsx'
 
 const CreditsContext = createContext(null)
@@ -17,6 +17,7 @@ export function CreditsProvider({ children }) {
   const [buyOpen, setBuyOpen] = useState(false)
   const timer = useRef(null)
   const total = useRef(null)
+  const checkoutOpenedAt = useRef(null) // when a checkout tab was last opened; null if none
   const unlockedSeen = useRef(user?.unlocked)
 
   const reload = useCallback(async () => {
@@ -40,24 +41,39 @@ export function CreditsProvider({ children }) {
     }
   }, [data, user, setUser])
 
-  useEffect(() => {
-    reload()
-    const onVisible = () => { if (document.visibilityState === 'visible') reload() }
-    document.addEventListener('visibilitychange', onVisible)
-    return () => document.removeEventListener('visibilitychange', onVisible)
-  }, [reload])
-
   useEffect(() => () => clearInterval(timer.current), [])
 
-  const startPolling = useCallback(() => {
+  const watch = useCallback(async () => {
     clearInterval(timer.current)
-    const before = total.current
+    const before = total.current ?? (await reload())?.balance.total // the balance we are waiting to change
     const started = Date.now()
     timer.current = setInterval(async () => {
       const d = await reload()
-      if (shouldStopPolling(before, d ? d.balance.total : before, Date.now() - started)) clearInterval(timer.current)
+      const after = d ? d.balance.total : before
+      if (shouldStopPolling(before, after, Date.now() - started)) {
+        clearInterval(timer.current)
+        if (after !== before) checkoutOpenedAt.current = null // the purchase arrived: no need to keep watching on every return
+      }
     }, 3000)
   }, [reload])
+
+  /** Call right after the checkout tab is opened. */
+  const startPolling = useCallback(() => {
+    checkoutOpenedAt.current = Date.now()
+    return watch()
+  }, [watch])
+
+  useEffect(() => {
+    reload()
+    const onVisible = () => {
+      if (document.visibilityState !== 'visible') return
+      // Back from the checkout tab: the payment confirmation can still be on its way, so keep checking for a while.
+      if (shouldResumePolling(checkoutOpenedAt.current)) watch()
+      else reload()
+    }
+    document.addEventListener('visibilitychange', onVisible)
+    return () => document.removeEventListener('visibilitychange', onVisible)
+  }, [reload, watch])
 
   const value = useMemo(
     () => ({ data, reload, startPolling, openBuy: () => setBuyOpen(true) }),

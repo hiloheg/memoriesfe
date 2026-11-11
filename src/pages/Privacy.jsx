@@ -233,7 +233,7 @@ export default function Privacy() {
           <p>
             Credits are paid through Lemon Squeezy, which processes the payment and issues the receipt as merchant of record.
             We never see card details. We keep a record of your credits (your account id, amounts, dates and order numbers) to know your balance;
-            purchase and refund records are kept for accounting after an account is deleted.
+            the credit record (your account id, amounts, dates and order numbers) is kept after an account is deleted, for accounting and so that credits cannot be handed out twice.
           </p>
         </section>
 
