@@ -12,6 +12,8 @@ import Logo from './components/Logo.jsx'
 import { PageLoader, TopProgress } from './components/Loaders.jsx'
 import MainNav from './components/MainNav.jsx'
 import UserMenu from './components/UserMenu.jsx'
+import CreditsChip from './components/CreditsChip.jsx'
+import { CreditsProvider } from './components/CreditsContext.jsx'
 import './App.css'
 
 function Brand() {
@@ -35,6 +37,7 @@ function PhotographerShell() {
   if (!user) return <PageLoader label="Checking your account…" />
 
   return (
+    <CreditsProvider>
     <div className="app">
       <TopProgress />
       <header className="bar-wrap">
@@ -46,6 +49,7 @@ function PhotographerShell() {
             <span>Visit my page</span>
             <span className="sr-only"> (opens in a new tab)</span>
           </a>
+          <CreditsChip />
           <UserMenu />
         </div>
       </header>
@@ -53,6 +57,7 @@ function PhotographerShell() {
         <Outlet />
       </div>
     </div>
+    </CreditsProvider>
   )
 }
 

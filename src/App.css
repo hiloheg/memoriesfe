@@ -1040,3 +1040,22 @@ button.linklike:hover { color: var(--accent-strong); background: none; }
 .logo-verdict strong { color: var(--accent-strong); }
 .logo-verdict.warn strong { color: var(--ink); }
 .logo-tips { margin: 2px 0 0; padding-left: 18px; font-size: 0.85rem; display: grid; gap: 3px; }
+
+/* Credits: the balance and Buy button in the header, and the pack list in the buy dialog. */
+.credits-chip { display: inline-flex; align-items: center; gap: 4px; padding: 3px 3px 3px 12px; border: 1px solid var(--line); border-radius: 999px; background: var(--paper); font-size: 0.92rem; white-space: nowrap; }
+.credits-chip.empty { border-color: var(--accent); background: var(--tint); }
+.credits-buy { padding: 6px 12px; border-radius: 999px; background: var(--accent); border-color: var(--accent); color: var(--on-accent); font-weight: 700; }
+.credits-buy:hover { background: var(--accent-strong); border-color: var(--accent-strong); }
+.credits-buy-short { display: none; }
+@media (max-width: 560px) {
+  .credits-chip { padding-left: 10px; gap: 2px; }
+  .credits-word, .credits-buy-long { display: none; }
+  .credits-buy-short { display: inline; }
+}
+.packs { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.pack { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; border: 1px solid var(--line); border-radius: var(--radius); }
+.pack .muted { display: block; font-size: 0.9rem; }
+.pack-note { font-size: 0.9rem; }
+@media (max-width: 420px) {
+  .pack { flex-direction: column; align-items: stretch; text-align: center; }
+}
