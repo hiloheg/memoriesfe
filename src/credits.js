@@ -43,3 +43,30 @@ export function shouldWarn(plan, days) {
 export function shouldStopPolling(before, after, elapsedMs) {
   return after !== before || elapsedMs >= 60000
 }
+
+/** The plan the next event will get: a purchased credit is spent before the free one; null when there is nothing to spend. */
+export function planToSpend(balance) {
+  if (balance.full > 0) return 'full'
+  if (balance.trial > 0) return 'trial'
+  return null
+}
+
+const longDate = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' })
+
+/** The text of the last step before a credit is used: what it costs, what the event gets, and the dates. */
+export function confirmSummary({ plan, eventDate, today = new Date(), balanceTotal }) {
+  const p = describePlan(plan)
+  const what = plan === 'trial'
+    ? `Trial event: up to ${p.photos} photos, ${p.cameras} camera, online for ${p.days} days`
+    : `Full event: up to ${p.photos} photos, online for ${p.days} days`
+  return {
+    title: 'This uses 1 credit',
+    lines: [
+      `You have ${balanceTotal} ${balanceTotal === 1 ? 'credit' : 'credits'}`,
+      what,
+      `Event date: ${longDate.format(new Date(`${eventDate}T00:00:00Z`))}`,
+      `Online until: ${longDate.format(expiryDate(plan, today))}`,
+    ],
+    note: 'The online-until date is fixed once the credit is used. You can still change the event name and icon later.',
+  }
+}

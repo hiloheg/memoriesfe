@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { PACKS, daysLeft, describePlan, expiryDate, perEvent, shouldStopPolling, shouldWarn } from './credits.js'
+import { PACKS, confirmSummary, daysLeft, describePlan, expiryDate, perEvent, planToSpend, shouldStopPolling, shouldWarn } from './credits.js'
 
 test('the three packs and what each event costs', () => {
   assert.deepEqual(PACKS.map((p) => [p.pack, p.credits, p.price]), [[1, 1, 19], [5, 5, 85], [10, 10, 150]])
@@ -38,4 +38,29 @@ test('polling for new credits stops when the balance changes or after a minute',
   assert.equal(shouldStopPolling(2, 3, 5000), true)
   assert.equal(shouldStopPolling(2, 2, 5000), false)
   assert.equal(shouldStopPolling(2, 2, 60000), true)
+})
+
+test('the confirmation names the credit, the dates and the limits', () => {
+  const today = new Date('2026-12-01T00:00:00Z')
+  const full = confirmSummary({ plan: 'full', eventDate: '2026-12-20', today, balanceTotal: 3 })
+  assert.equal(full.title, 'This uses 1 credit')
+  assert.ok(full.lines.includes('You have 3 credits'), full.lines.join('|'))
+  assert.ok(full.lines.some((l) => l.includes('3000 photos') && l.includes('90 days')), full.lines.join('|'))
+  assert.ok(full.lines.some((l) => l.includes('20 Dec 2026')), full.lines.join('|'))
+  assert.ok(full.lines.some((l) => l.includes('1 Mar 2027')), full.lines.join('|'))
+  assert.match(full.note, /fixed/)
+  const one = confirmSummary({ plan: 'full', eventDate: '2026-12-20', today, balanceTotal: 1 })
+  assert.ok(one.lines.includes('You have 1 credit'), one.lines.join('|'))
+})
+
+test('a trial event says it is a trial and has one camera', () => {
+  const t = confirmSummary({ plan: 'trial', eventDate: '2026-12-20', today: new Date('2026-12-01T00:00:00Z'), balanceTotal: 1 })
+  assert.ok(t.lines.some((l) => l.includes('Trial') && l.includes('300 photos') && l.includes('1 camera') && l.includes('30 days')), t.lines.join('|'))
+  assert.ok(t.lines.some((l) => l.includes('31 Dec 2026')), t.lines.join('|'))
+})
+
+test('a purchased credit is spent before the free one', () => {
+  assert.equal(planToSpend({ trial: 1, full: 2, total: 3 }), 'full')
+  assert.equal(planToSpend({ trial: 1, full: 0, total: 1 }), 'trial')
+  assert.equal(planToSpend({ trial: 0, full: 0, total: 0 }), null)
 })
