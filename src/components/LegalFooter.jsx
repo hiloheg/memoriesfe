@@ -13,19 +13,19 @@ const sal = Object.values(import.meta.glob('../assets/anpc-sal.svg', { eager: tr
 export default function LegalFooter() {
   return (
     <footer className="legal-footer">
+      <nav className="legal-links" aria-label="Legal">
+        <Link to="/terms">Terms</Link>
+        <Link to="/privacy">Privacy policy</Link>
+        <Link to="/refunds">Refunds</Link>
+        <a href={LEGAL.anpcUrl} target="_blank" rel="noopener noreferrer" title={LEGAL.anpcLabel} aria-label={`${LEGAL.anpcLabel} (opens in a new tab)`}>ANPC</a>
+        <button type="button" className="linklike" onClick={reopenConsent}>Cookie settings</button>
+      </nav>
       <div className="legal-row">
-        <nav className="legal-links" aria-label="Legal">
-          <Link to="/terms">Terms</Link>
-          <Link to="/privacy">Privacy policy</Link>
-          <Link to="/refunds">Refunds</Link>
-          <a href={LEGAL.anpcUrl} target="_blank" rel="noopener noreferrer" title={LEGAL.anpcLabel} aria-label={`${LEGAL.anpcLabel} (opens in a new tab)`}>ANPC</a>
-          <button type="button" className="linklike" onClick={reopenConsent}>Cookie settings</button>
-        </nav>
+        <LegalIdentity />
         <a className="legal-sal" href={LEGAL.salUrl} target="_blank" rel="noopener noreferrer" title={LEGAL.salLabel} aria-label={`${LEGAL.salLabel} (opens in a new tab)`}>
           {sal ? <img src={sal} width="186" height="46" alt="" /> : 'Alternative dispute resolution (SAL)'}
         </a>
       </div>
-      <LegalIdentity />
     </footer>
   )
 }

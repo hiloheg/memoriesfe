@@ -1082,7 +1082,7 @@ button.linklike:hover { color: var(--accent-strong); background: none; }
 
 /* Legal footer: one small strip, in the same width and voice as the top bar. */
 .legal-footer { max-width: 1080px; margin: 24px auto 0; padding: 14px 24px calc(18px + env(safe-area-inset-bottom)); border-top: 1px solid var(--line); display: flex; flex-direction: column; gap: 10px; color: var(--ink-soft); font-size: 0.8rem; line-height: 1.45; }
-.legal-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 20px; }
+.legal-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 24px; }
 .legal-links { display: flex; flex-wrap: wrap; gap: 4px 16px; }
 .legal-links a, .legal-links button { color: var(--ink-soft); text-decoration: none; font: inherit; padding: 2px 0; }
 .legal-links a:hover, .legal-links button:hover { color: var(--accent); text-decoration: underline; }
