@@ -15,7 +15,7 @@ const full = describePlan('full')
 // What a purchased credit gives over the free one. `was` is the free credit, `now` is what a pack gives.
 const UPGRADES = [
   { label: 'Photos per event', was: free.photos.toLocaleString('en'), now: full.photos.toLocaleString('en') },
-  { label: 'Storage per event', was: '4 GB', now: '40 GB' },
+  { label: 'Storage per event', was: '4 GB', now: '500 GB' },
   { label: 'Online for', was: `${free.days} days`, now: `${full.days} days` },
   { label: 'Cameras per event', was: `${free.cameras}`, now: 'Unlimited' },
 ]
