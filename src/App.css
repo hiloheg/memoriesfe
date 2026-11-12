@@ -164,10 +164,10 @@ button:disabled { opacity: 0.6; cursor: progress; }
 
 /* ---------- profile page ---------- */
 .profile-page { background: var(--mist); }
-.profile-hero { display: flex; gap: clamp(20px, 4vw, 40px); align-items: center; padding: clamp(32px, 7vw, 72px) 8px 32px; flex-wrap: wrap; }
+.profile-hero { display: flex; gap: clamp(16px, 3vw, 28px); align-items: center; padding: clamp(10px, 2.4vw, 24px) 8px 12px; flex-wrap: wrap; }
 .profile-avatar { flex: none; line-height: 0; padding: 6px; border-radius: 50%; border: 3px solid var(--accent); background: var(--paper); }
-.profile-text { display: flex; flex-direction: column; gap: 10px; min-width: 0; flex: 1 1 320px; }
-.profile-text h1 { font-size: clamp(2.2rem, 5.4vw, 3.8rem); overflow-wrap: anywhere; }
+.profile-text { display: flex; flex-direction: column; gap: 6px; min-width: 0; flex: 1 1 320px; }
+.profile-text h1 { font-size: clamp(1.9rem, 4.4vw, 3rem); overflow-wrap: anywhere; }
 .profile-tagline { font-family: var(--display); font-weight: 600; font-size: clamp(1.05rem, 2vw, 1.3rem); color: var(--accent-strong); letter-spacing: -0.01em; }
 .profile-bio { color: var(--ink-soft); max-width: 56ch; white-space: pre-line; }
 .profile-links { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
@@ -332,8 +332,8 @@ textarea:focus-visible { outline-offset: 0; border-color: var(--accent); }
   .gallery-head { padding: 28px 4px 16px; }
   .tabs { margin: 0 -12px 16px; padding: 10px 12px; }
   .tab { min-height: 40px; }
-  .profile-hero { padding: 28px 4px 20px; }
-  .profile-avatar > .avatar { width: 104px !important; height: 104px !important; }
+  .profile-hero { padding: 10px 4px 12px; }
+  .profile-avatar > .avatar { width: 84px !important; height: 84px !important; }
   .profile-links .chip { padding: 9px 14px; }
   .follow { margin: 8px 0; }
   .follow-list { flex-direction: column; }
@@ -541,21 +541,27 @@ fieldset:disabled { opacity: 0.75; }
 }
 
 /* Main event: photos shown right on the profile, newest first, loading more while scrolling. */
-.photo-stream { padding: 8px 8px 0; }
+.photo-stream { padding: 0 8px 0; }
 .stream-title { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; margin-bottom: 4px; }
 .stream-date { font-size: 1rem; font-weight: 600; color: var(--ink-soft); }
 .stream-cols { display: flex; align-items: flex-start; gap: 8px; margin-top: 14px; }
 .stream-col { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; }
 .stream-sentinel { height: 1px; }
 @media (max-width: 600px) {
-  .photo-stream { padding: 8px 4px 0; }
+  .photo-stream { padding: 0 4px 0; }
   .stream-cols { gap: 4px; }
 }
 
 /* Camera login dialog and per-camera actions */
-.creds-list { margin: 0; display: grid; grid-template-columns: max-content 1fr; gap: 8px 18px; padding: 16px; border-radius: var(--radius-lg); background: var(--tint); }
+.creds-list { margin: 0; display: flex; flex-direction: column; gap: 2px; padding: 8px 12px; border-radius: var(--radius-lg); background: var(--tint); }
+.cred-row { display: grid; grid-template-columns: 6.5rem minmax(0, 1fr) auto; align-items: center; gap: 4px 12px; padding: 6px 0; }
+.cred-row + .cred-row { border-top: 1px solid color-mix(in srgb, var(--ink) 8%, transparent); }
 .creds-list dt { color: var(--ink-soft); }
 .creds-list dd { margin: 0; font-family: ui-monospace, Consolas, monospace; font-weight: 600; word-break: break-all; }
+.cred-copy { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; min-height: 0; padding: 0; border-radius: 10px; color: var(--ink-soft); }
+.cred-copy:hover { color: var(--ink); }
+.cred-copy.done { color: var(--accent-strong); border-color: var(--accent); }
+@media (max-width: 480px) { .cred-row { grid-template-columns: minmax(0, 1fr) auto; } .cred-row dt { grid-column: 1 / -1; font-size: 0.85rem; } }
 .row-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
 
 /* Dashboard: events as a list, one row each, easy to scan and to tap */
@@ -645,7 +651,7 @@ fieldset:disabled { opacity: 0.75; }
 .password-gate { max-width: 380px; margin: 56px auto; display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; color: var(--ink); }
 .password-gate svg { color: var(--accent); }
 .password-gate .field, .password-gate input { width: 100%; }
-.stream-back { display: inline-block; margin: 0 8px 14px; }
+.stream-back { display: inline-block; margin: 0 8px 8px; }
 
 /* Event settings are edited as a draft and saved with a button */
 .visibility-panel fieldset { border: 0; margin: 0; padding: 0; min-width: 0; display: flex; flex-direction: column; gap: 12px; }
@@ -814,8 +820,11 @@ button.linklike:hover { color: var(--accent-strong); background: none; }
 .sample-img { display: block; width: 100%; aspect-ratio: 4 / 5; border-radius: 6px; background: linear-gradient(160deg, var(--accent), var(--accent-strong)); }
 
 /* every framed theme: the header sits in a box, so it needs even padding instead of the big top gap */
-:is(.fr-neon, .fr-gold, .fr-holo, .fr-pixel, .fr-paper) .profile-hero { margin-top: 16px; padding: clamp(18px, 4vw, 36px); }
-:is(.fr-neon, .fr-gold, .fr-holo, .fr-pixel, .fr-paper) .photo-stream { margin-top: 24px; padding: clamp(10px, 2.4vw, 20px); }
+:is(.fr-neon, .fr-gold, .fr-holo, .fr-pixel, .fr-paper) .profile-hero { margin-top: 12px; padding: clamp(10px, 2vw, 16px); }
+:is(.fr-neon, .fr-gold, .fr-holo, .fr-pixel, .fr-paper) .photo-stream { margin-top: 12px; padding: clamp(8px, 1.6vw, 12px); }
+/* The socials sit the same distance (12px) from the header above and the photos below; in a frame the header and the photos are boxes, so the gap is the margin. */
+:is(.fr-neon, .fr-gold, .fr-holo, .fr-pixel, .fr-paper) .social-card { margin: 12px 0 0; }
+:is(.fr-neon, .fr-gold, .fr-holo, .fr-pixel, .fr-paper) .stream-back { margin-top: 12px; }
 :is(.fr-neon, .fr-gold, .fr-holo, .fr-pixel, .fr-paper) :is(.photo, .guest-tile) { margin-bottom: 16px; }
 :is(.fr-gold, .fr-holo, .fr-pixel, .fr-paper) .photo:hover img { transform: none; } /* the zoom would spill over the frame */
 
@@ -917,7 +926,7 @@ button.linklike:hover { color: var(--accent-strong); background: none; }
 /* ---------- social links in a card ----------
    A slim bar under the header with compact buttons. The buttons are solid, so they
    always stand out; their color is the photographer's "Social button color" (--social), the page accent by default. */
-.social-card { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin: 14px 0 0; padding: 12px 14px;
+.social-card { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin: 0 0 12px; padding: 10px 14px;
   border: 1px solid var(--line); border-radius: 16px; background: color-mix(in srgb, var(--paper) 85%, transparent); backdrop-filter: blur(10px);
   box-shadow: 0 1px 2px rgba(18, 22, 28, 0.06); }
 .social-card .profile-links { margin: 0; gap: 8px; }
@@ -1180,3 +1189,18 @@ button.linklike:hover { color: var(--accent-strong); background: none; }
 .tag-filter .tab.tag-find svg { opacity: 1; }
 .tag-filter .tab.tag-mine[aria-pressed='true'] { background: color-mix(in srgb, var(--accent) 14%, var(--paper)); border-color: var(--accent); color: var(--accent); font-weight: 700; }
 .tag-mine .tag-x { margin-left: 2px; font-size: 1.15em; line-height: 1; }
+.camera-filter { position: static; margin: 0; padding: 0; background: none; backdrop-filter: none; flex-wrap: wrap; overflow: visible; }
+.manage-grid { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.manage-grid li { position: relative; aspect-ratio: 1; border-radius: var(--radius); overflow: hidden; background: var(--line); }
+.manage-grid img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.manage-from { position: absolute; left: 6px; bottom: 6px; max-width: calc(100% - 12px); padding: 3px 9px; border-radius: 999px; background: rgba(18, 22, 28, 0.62); color: #fff; font-size: 0.78rem; font-weight: 600; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; backdrop-filter: blur(4px); }
+.manage-delete { position: absolute; top: 6px; right: 6px; display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; min-height: 0; padding: 0; border-radius: 50%; background: rgba(18, 22, 28, 0.62); border-color: transparent; color: #fff; backdrop-filter: blur(4px); }
+.manage-delete:hover { background: var(--danger); border-color: transparent; color: #fff; }
+.manage-more { background: var(--tint); border: 2px dashed color-mix(in srgb, var(--accent) 45%, transparent); }
+.manage-more > button { width: 100%; height: 100%; border: 0; border-radius: 0; background: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: var(--accent-strong); font-weight: 700; }
+.manage-more > button:hover { background: color-mix(in srgb, var(--accent) 10%, transparent); }
+.manage-more-plus { font-size: 2rem; line-height: 1; }
+.manage-more small { color: var(--ink-soft); font-weight: 500; }
+.guest-line { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin: 0; }
+.status-note { display: inline-flex; align-items: center; gap: 5px; margin-left: 10px; font-size: 0.82rem; color: var(--ink-soft); white-space: nowrap; }
+.status-note svg { flex: none; opacity: 0.8; }

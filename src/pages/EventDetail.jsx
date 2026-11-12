@@ -4,13 +4,49 @@ import { useAuth } from '../auth.jsx'
 import { readError } from '../accents.js'
 import { useCredits } from '../components/CreditsContext.jsx'
 import EventQr from '../components/EventQr.jsx'
-import GuestPhotos from '../components/GuestPhotos.jsx'
+import EventPhotos from '../components/EventPhotos.jsx'
 import IconPicker from '../components/IconPicker.jsx'
 import { DetailSkeleton, Spinner } from '../components/Loaders.jsx'
 import Modal from '../components/Modal.jsx'
 import { eventStatus } from '../credits.js'
 import { accessUntil, formatDay } from '../dates.js'
 import { EventBadge } from '../eventIcons.jsx'
+
+const CopyIcon = () => (
+  <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="9" y="9" width="11" height="11" rx="2" /><path d="M5 15V6a2 2 0 0 1 2-2h9" />
+  </svg>
+)
+const CheckIcon = () => (
+  <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M5 12.5l4.5 4.5L19 7.5" />
+  </svg>
+)
+
+/** One line of a camera login: the name, the value and its own copy button. */
+function CredRow({ label, value, missing }) {
+  const [copied, setCopied] = useState(false)
+  useEffect(() => {
+    if (!copied) return
+    const t = setTimeout(() => setCopied(false), 1500)
+    return () => clearTimeout(t)
+  }, [copied])
+  return (
+    <div className="cred-row">
+      <dt>{label}</dt>
+      <dd>{missing ? 'Not available' : value}</dd>
+      {!missing && (
+        <button type="button" className={copied ? 'cred-copy done' : 'cred-copy'} aria-label={copied ? `${label} copied` : `Copy ${label}`} title={copied ? 'Copied' : `Copy ${label}`}
+          onClick={() => { navigator.clipboard?.writeText(String(value)); setCopied(true) }}>
+          {copied ? <CheckIcon /> : <CopyIcon />}
+        </button>
+      )}
+    </div>
+  )
+}
+
+/** Where a camera saves its pictures: the top of its own folder. */
+const STORE_PATH = '/'
 
 function Credentials({ cred, until, fresh, onReset, resetting, onClose }) {
   const [copied, setCopied] = useState(false)
@@ -20,6 +56,7 @@ FTP port: ${cred.ftpPort}
 SFTP port: ${cred.sftpPort}
 User: ${cred.username}
 Password: ${cred.password}
+Store path: ${STORE_PATH}
 Works until: ${formatDay(until)}`
   function copy() {
     navigator.clipboard?.writeText(text)
@@ -31,12 +68,13 @@ Works until: ${formatDay(until)}`
         {fresh ? 'Enter these in the camera FTP settings.' : hasPassword ? 'The login for this camera.' : 'The password of this camera was not kept. Reset it to get a new one; the old one stops working.'}
       </p>
       <dl className="creds-list">
-        <dt>Host</dt><dd>{cred.ftpHost}</dd>
-        <dt>FTP port</dt><dd>{cred.ftpPort}</dd>
-        <dt>SFTP port</dt><dd>{cred.sftpPort}</dd>
-        <dt>User</dt><dd>{cred.username}</dd>
-        <dt>Password</dt><dd>{hasPassword ? cred.password : 'Not available'}</dd>
-        <dt>Works until</dt><dd>{formatDay(until)}</dd>
+        <CredRow label="Host" value={cred.ftpHost} />
+        <CredRow label="FTP port" value={cred.ftpPort} />
+        <CredRow label="SFTP port" value={cred.sftpPort} />
+        <CredRow label="User" value={cred.username} />
+        <CredRow label="Password" value={cred.password} missing={!hasPassword} />
+        <CredRow label="Store path" value={STORE_PATH} />
+        <CredRow label="Works until" value={formatDay(until)} />
       </dl>
       <div className="modal-actions">
         {onReset && <button type="button" onClick={onReset} disabled={resetting}>{resetting && <Spinner />}{resetting ? 'Resetting…' : 'Reset password'}</button>}
@@ -109,7 +147,8 @@ function EditEventForm({ event, onSave, onClose }) {
 
 const TABS = [
   { key: 'event', label: 'Event' },
-  { key: 'photos', label: 'Guest photos' },
+  { key: 'cameras', label: 'Cameras' },
+  { key: 'photos', label: 'Photos' },
   { key: 'share', label: 'Share' },
 ]
 
@@ -379,6 +418,12 @@ export default function EventDetail() {
             {event.main && <span className="status-pill main">Main</span>}
             {event.visibility === 'private' && <span className="status-pill">Private</span>}
             {event.visibility === 'protected' && <span className="status-pill">Protected</span>}
+            {status?.kind === 'active' && (
+              <span className="status-note" title="How long the photos of this event stay online">
+                <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>
+                {status.text}
+              </span>
+            )}
           </p>
         </div>
         <div className="event-head-actions">
@@ -386,7 +431,7 @@ export default function EventDetail() {
           <button type="button" onClick={() => { navigator.clipboard?.writeText(event.shareUrl); setLinkCopied(true) }}>{linkCopied ? 'Link copied' : 'Copy link'}</button>
         </div>
       </header>
-      {status && (
+      {status && status.kind !== 'active' && (
         <p className={status.kind === 'active' ? 'notice-info' : 'notice-warn'} role="status" style={{ marginBottom: 16 }}>{status.text}</p>
       )}
       {error && <p role="alert" className="error" style={{ marginBottom: 16 }}>{error}</p>}
@@ -411,61 +456,61 @@ export default function EventDetail() {
 
       {tab === 'photos' && (
         <div role="tabpanel" id="panel-photos" aria-labelledby="tab-photos">
-          <GuestPhotos eventId={id} uploadsOn={event.guestUploadsEnabled && event.guestUploadLimit > 0} onOpenSettings={() => setTab('event')} />
+          <EventPhotos eventId={id} uploadsOn={event.guestUploadsEnabled && event.guestUploadLimit > 0} onOpenSettings={() => setTab('event')} />
         </div>
       )}
 
-      <div role="tabpanel" id="panel-event" aria-labelledby="tab-event" hidden={tab !== 'event'} className="event-layout two">
+      <div role="tabpanel" id="panel-event" aria-labelledby="tab-event" hidden={tab !== 'event'} className="event-layout single">
         <div className="event-main">
-          <div className="section-title">
-            <h2>Cameras</h2>
-          </div>
-          <p className="muted">Each camera becomes a folder in the guest gallery, so name it for what it shoots.</p>
-          {event.cameraAccessExpired ? (
-            <p className="notice-warn" role="status">Camera logins for this event stopped working on {formatDay(accessUntil(event.eventDate))}. Create a new event to add cameras for another date.</p>
-          ) : (
-            <p className="notice-info">Camera logins work until the end of {formatDay(accessUntil(event.eventDate))}, 3 days after the event.</p>
-          )}
-          {!closed && atCameraLimit && (
-            <p className="notice-info" role="status">
-              Trial events support 1 camera. Buy a pack to create full events with more cameras.{' '}
-              <button type="button" className="primary" onClick={openBuy}>Buy credits</button>
-            </p>
-          )}
-          <ul className="event-list">
-            {!closed && (
-              <li>
-                <button type="button" className="event-row new-row" onClick={() => setAdding(true)} disabled={atCameraLimit}>
-                  <span className="new-plus" aria-hidden="true">+</span>
-                  <span>Add camera</span>
-                </button>
-              </li>
-            )}
-            {cameras.map((c) => (
-              <li key={c.id}>
-                <div className="event-row camera-row">
-                  <EventBadge name="camera" />
-                  <span className="row-text">
-                    <strong>{c.name}</strong>
-                    <small className="mono">{c.username}</small>
-                  </span>
-                  <span className="camera-actions">
-                    <button type="button" onClick={() => showLogin(c)} disabled={pending !== null}>{pending === `login:${c.id}` && <Spinner />}Show details</button>
-                    <button type="button" className="danger" onClick={() => removeCamera(c)} disabled={pending !== null}>{pending === `cam:${c.id}` && <Spinner />}{pending === `cam:${c.id}` ? 'Deleting…' : 'Delete'}</button>
-                  </span>
-                </div>
-              </li>
-            ))}
-          </ul>
-          {cameras.length === 0 && event.cameraAccessExpired && <p className="empty">No cameras were added to this event.</p>}
+          <SettingsPanel key={`${event.visibility}|${event.accessPassword}|${event.main}|${event.guestUploadsEnabled}|${event.guestUploadLimit}|${event.faceSearchEnabled}`} event={event} onSave={saveSettings} />
           <div className="danger-zone">
             <button className="danger" onClick={removeEvent} disabled={pending !== null}>{pending === 'delete' && <Spinner />}{pending === 'delete' ? 'Deleting…' : 'Delete event'}</button>
           </div>
         </div>
+      </div>
 
-        <aside className="event-side">
-        <SettingsPanel key={`${event.visibility}|${event.accessPassword}|${event.main}|${event.guestUploadsEnabled}|${event.guestUploadLimit}|${event.faceSearchEnabled}`} event={event} onSave={saveSettings} />
-        </aside>
+      <div role="tabpanel" id="panel-cameras" aria-labelledby="tab-cameras" hidden={tab !== 'cameras'}>
+        <div className="section-title">
+          <h2>Cameras</h2>
+        </div>
+        <p className="muted">Each camera becomes a folder in the guest gallery, so name it for what it shoots.</p>
+        {event.cameraAccessExpired ? (
+          <p className="notice-warn" role="status">Camera logins for this event stopped working on {formatDay(accessUntil(event.eventDate))}. Create a new event to add cameras for another date.</p>
+        ) : (
+          <p className="notice-info">Camera logins work until the end of {formatDay(accessUntil(event.eventDate))}, 3 days after the event.</p>
+        )}
+        {!closed && atCameraLimit && (
+          <p className="notice-info" role="status">
+            Trial events support 1 camera. Buy a pack to create full events with more cameras.{' '}
+            <button type="button" className="primary" onClick={openBuy}>Buy credits</button>
+          </p>
+        )}
+        <ul className="event-list">
+          {!closed && (
+            <li>
+              <button type="button" className="event-row new-row" onClick={() => setAdding(true)} disabled={atCameraLimit}>
+                <span className="new-plus" aria-hidden="true">+</span>
+                <span>Add camera</span>
+              </button>
+            </li>
+          )}
+          {cameras.map((c) => (
+            <li key={c.id}>
+              <div className="event-row camera-row">
+                <EventBadge name="camera" />
+                <span className="row-text">
+                  <strong>{c.name}</strong>
+                  <small className="mono">{c.username}</small>
+                </span>
+                <span className="camera-actions">
+                  <button type="button" onClick={() => showLogin(c)} disabled={pending !== null}>{pending === `login:${c.id}` && <Spinner />}Show details</button>
+                  <button type="button" className="danger" onClick={() => removeCamera(c)} disabled={pending !== null}>{pending === `cam:${c.id}` && <Spinner />}{pending === `cam:${c.id}` ? 'Deleting…' : 'Delete'}</button>
+                </span>
+              </div>
+            </li>
+          ))}
+        </ul>
+        {cameras.length === 0 && event.cameraAccessExpired && <p className="empty">No cameras were added to this event.</p>}
       </div>
       <Modal open={adding} onClose={() => setAdding(false)} title="Add a camera">
         <AddCameraForm onAdd={addCamera} onClose={() => setAdding(false)} />

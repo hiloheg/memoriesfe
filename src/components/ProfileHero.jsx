@@ -19,11 +19,11 @@ export default function ProfileHero({ profile, href }) {
     <header className="profile-hero">
       {href ? (
         <Link to={href} className="profile-avatar profile-avatar-link" aria-label={`${name || 'Photographer'}: all events`}>
-          <Avatar user={{ name, email: name, picture }} size={132} />
+          <Avatar user={{ name, email: name, picture }} size={104} />
         </Link>
       ) : (
         <span className="profile-avatar">
-          <Avatar user={{ name, email: name, picture }} size={132} />
+          <Avatar user={{ name, email: name, picture }} size={104} />
         </span>
       )}
       <div className="profile-text">
