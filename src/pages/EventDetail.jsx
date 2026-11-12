@@ -120,6 +120,7 @@ const startLimit = (event) => (event.guestUploadsEnabled ? event.guestUploadLimi
 function SettingsPanel({ event, onSave }) {
   const { user } = useAuth()
   const { openBuy } = useCredits()
+  const faceReady = event.faceSearchAvailable !== false // the server switches the whole feature on with FACE_SEARCH_ENABLED
   const faceLocked = user?.unlocked === false // face search comes with the first purchase
   const [visibility, setVisibility] = useState(event.visibility)
   const [password, setPassword] = useState(event.accessPassword ?? '')
@@ -197,15 +198,19 @@ function SettingsPanel({ event, onSave }) {
             <span className="muted">Guests sign in with Google, then add their own photos to this event. They show up straight away, with the guest's name.</span>
           </span>
         </label>
-        <label className="check main-toggle">
-          <input type="checkbox" checked={faceOn} disabled={faceLocked && !event.faceSearchEnabled} onChange={(e) => setFaceOn(e.target.checked)} />
-          <span>
-            <strong>Let guests find their photos by scanning their face</strong>
-            <span className="muted">Guests agree to a face scan first, and their picture is not saved. The faces in your photos are measured on our server and deleted with the event. You are responsible for telling the people you photograph where the law requires it.</span>
-          </span>
-        </label>
-        {faceLocked && !event.faceSearchEnabled && (
-          <p className="muted">Face search comes with your first purchase. <button type="button" className="linklike" onClick={openBuy}>Buy credits</button></p>
+        {faceReady && (
+          <>
+          <label className="check main-toggle">
+            <input type="checkbox" checked={faceOn} disabled={faceLocked && !event.faceSearchEnabled} onChange={(e) => setFaceOn(e.target.checked)} />
+            <span>
+              <strong>Let guests find their photos by scanning their face</strong>
+              <span className="muted">Guests agree to a face scan first, and their picture is not saved. The faces in your photos are measured on our server and deleted with the event. You are responsible for telling the people you photograph where the law requires it.</span>
+            </span>
+          </label>
+          {faceLocked && !event.faceSearchEnabled && (
+            <p className="muted">Face search comes with your first purchase. <button type="button" className="linklike" onClick={openBuy}>Buy credits</button></p>
+          )}
+          </>
         )}
         {guestOn && (
           <label className="guest-limit">
