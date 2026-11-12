@@ -10,7 +10,7 @@ const COMPANY = 'HILOHE GIGI PFA'
 const CUI = '54766547'
 const CONTACT_EMAIL = import.meta.env.VITE_CONTACT_EMAIL
 const ADDRESS = import.meta.env.VITE_COMPANY_ADDRESS
-const UPDATED = '10 November 2026'
+const UPDATED = '12 November 2026'
 
 function Contact() {
   return (
@@ -26,7 +26,10 @@ function Contact() {
 export default function Privacy() {
   useEffect(() => {
     document.title = 'Privacy policy | imemories'
-    window.scrollTo(0, 0)
+    // A link such as /privacy#faces lands on its section; otherwise start at the top.
+    const target = window.location.hash ? document.getElementById(window.location.hash.slice(1)) : null
+    if (target) target.scrollIntoView()
+    else window.scrollTo(0, 0)
   }, [])
 
   return (
@@ -47,6 +50,7 @@ export default function Privacy() {
           <a href="#sharing">Who else sees data</a>
           <a href="#keep">How long we keep it</a>
           <a href="#rights">Your rights</a>
+          <a href="#faces">Finding your photos by face</a>
           <a href="#photos">If you are in a photo</a>
           <a href="#security">Security</a>
         </nav>
@@ -108,6 +112,18 @@ export default function Privacy() {
                   <td>Your Google account ID, your Google name, the photos you add and when you added them.</td>
                   <td>To let you add photos to an event, show your name next to them, and count your uploads against the limit the event creator set.</td>
                   <td>Your request to upload (Art. 6(1)(b)); for the photos, the event creator decides (we are the processor, Art. 28)</td>
+                </tr>
+                <tr>
+                  <td>Guests who scan their face</td>
+                  <td>The picture you take or choose, and a set of numbers measured from your face in it. Both exist only while we compare them, and are not saved.</td>
+                  <td>To show you the photos of the event you appear in, when you press "Find my photos".</td>
+                  <td>Your explicit consent (Art. 6(1)(a) and Art. 9(2)(a)), given before every scan</td>
+                </tr>
+                <tr>
+                  <td>People in photos of events with face search on</td>
+                  <td>A set of numbers measured from each face found in the event's photos. It is not a name and is not linked to any account.</td>
+                  <td>Only to compare with a guest's own scan inside that same event. Not used for anything else.</td>
+                  <td>The photographer decides when to switch it on (we are the processor, Art. 28). See "Finding your photos by face".</td>
                 </tr>
                 <tr>
                   <td>Everyone who visits</td>
@@ -178,6 +194,8 @@ export default function Privacy() {
           <h2>How long we keep it</h2>
           <ul>
             <li><strong>Account, page, events, cameras and photos:</strong> until you delete them. Deleting an event or a camera deletes its photos from storage. Deleting your account deletes everything above.</li>
+            <li><strong>Face measurements of event photos</strong> (only when face search is on): deleted with the event's photos, or earlier if the photographer deletes the photo or the event. They are never kept after the event ends.</li>
+            <li><strong>A guest's own scan:</strong> not kept. The picture and its measurements are discarded as soon as the search finishes.</li>
             <li><strong>Camera logins</strong> stop working 3 days after the event date, and are removed when you delete the camera or event.</li>
             <li><strong>Server logs:</strong> no longer than 30 days.</li>
             <li><strong>Messages to us:</strong> as long as needed to answer you, and then up to the time the law requires.</li>
@@ -206,6 +224,26 @@ export default function Privacy() {
           <p>
             Only the event creator can remove a guest's photo. We keep your Google name, account ID and upload times for as long as the event exists, and delete them with it.
             To have your name and photos removed earlier, write to <Contact /> from the Google account you used.
+          </p>
+        </section>
+
+        <section id="faces">
+          <h2>Finding your photos by face</h2>
+          <p>
+            Photographers with a purchased credit can switch on "Find my photos" for an event. It is off unless the photographer turns it on.
+            When it is on, a guest can scan their own face to see only the photos they appear in, shown as "Included myself".
+            Measurements of faces are biometric data, a special category under the GDPR, so we handle them with extra care.
+          </p>
+          <ul>
+            <li><strong>Your consent comes first.</strong> Before every scan you must tick a box agreeing to it. If you do not agree, nothing is scanned and you can still see all the photos.</li>
+            <li><strong>Your scan is not kept.</strong> The picture and the measurements from it are used once, in memory, to compare with the faces found in that event's photos, and are then discarded. We do not save them, log them or send them to anyone.</li>
+            <li><strong>Only inside one event.</strong> Faces are compared only with the photos of the event you are looking at. We do not build a list of people, match across events, name anyone, or link a face to an account.</li>
+            <li><strong>Everything runs on our own server.</strong> No face data is sent to an outside face recognition service.</li>
+            <li><strong>Photos of other people.</strong> To make the search work, the event's photos are scanned once and a set of measurements is kept for each face found. They are deleted with the event's photos (see "How long we keep it"). The photographer is the controller of the photos and decides to switch this on, and is responsible for having the right basis to do so, including telling the people they photograph where the law requires it. We are their processor.</li>
+          </ul>
+          <p>
+            <strong>Your choices.</strong> You can withdraw consent at any time by not scanning; there is nothing stored to withdraw from our side for a guest's own scan.
+            If you appear in a photo of an event with face search on and do not want your face measured, write to <Contact /> with the link to the event and we will remove the measurements and, with the photographer's agreement, switch the feature off for that event. You can also object to the photographer directly.
           </p>
         </section>
 

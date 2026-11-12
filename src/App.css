@@ -1130,3 +1130,18 @@ button.linklike:hover { color: var(--accent-strong); background: none; }
 .legal-id { font-style: normal; display: flex; flex-direction: column; gap: 2px; }
 .legal-footer .legal-id { flex-direction: row; flex-wrap: wrap; gap: 2px 16px; max-width: 90ch; font-size: 0.75rem; opacity: 0.85; }
 @media (max-width: 560px) { .legal-footer { padding-left: 16px; padding-right: 16px; } }
+
+/* ---------- find my photos (face search) ---------- */
+.face-points { margin: 0; padding-left: 1.1em; display: flex; flex-direction: column; gap: 6px; color: var(--ink-soft); font-size: 0.95rem; }
+.face-frame { position: relative; width: min(240px, 64%); aspect-ratio: 3 / 4; margin: 4px auto; border-radius: 50%; overflow: hidden; background: var(--line); box-shadow: 0 0 0 4px var(--paper), 0 0 0 7px var(--accent); }
+.face-frame video, .face-frame img { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); display: block; }
+.face-line { position: absolute; left: 0; right: 0; top: 50%; height: 3px; background: linear-gradient(90deg, transparent, var(--accent), transparent); box-shadow: 0 0 14px var(--accent); opacity: 0; }
+.face-frame.scanning .face-line { opacity: 1; animation: face-sweep 1.6s ease-in-out infinite alternate; }
+@keyframes face-sweep { from { top: 6%; } to { top: 94%; } }
+.face-status { display: flex; align-items: center; justify-content: center; gap: 8px; text-align: center; margin: 0; }
+.face-actions { align-items: center; }
+.face-actions [aria-disabled="true"] { opacity: 0.5; pointer-events: none; }
+.find-me { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; margin: 14px 0 4px; }
+.find-me .muted { font-size: 0.92rem; }
+@media (max-width: 600px) { .face-actions > * { flex: 1; } }
+@media (prefers-reduced-motion: reduce) { .face-frame.scanning .face-line { animation: none; top: 50%; } }

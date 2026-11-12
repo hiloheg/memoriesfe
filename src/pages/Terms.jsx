@@ -7,7 +7,7 @@ import { LEGAL } from '../legal.js'
 /** Terms and conditions of the service. Public, no sign-in. */
 export default function Terms() {
   return (
-    <LegalPage title="Terms and conditions" updated="11 November 2026" intro="These terms apply when you use imemories (Instant Memories) to share event photos.">
+    <LegalPage title="Terms and conditions" updated="12 November 2026" intro="These terms apply when you use imemories (Instant Memories) to share event photos.">
       <section>
         <h2>Who we are</h2>
         <LegalIdentity />
@@ -29,7 +29,7 @@ export default function Terms() {
           <li>Packs: 1 credit for €19, 5 credits for €85, 10 credits for €150. Prices are shown without VAT; the checkout shows the final price.</li>
           <li>Payment is handled by Lemon Squeezy, which sells the credits as merchant of record and issues the receipt.</li>
           <li>Credits do not expire.</li>
-          <li>Your first purchase unlocks your page look, your logo on downloaded camera photos, and the photo editor for your guests.</li>
+          <li>Your first purchase unlocks your page look, your logo on downloaded camera photos, the photo editor for your guests, and face search ("Find my photos") for your events.</li>
         </ul>
       </section>
 
@@ -49,6 +49,12 @@ export default function Terms() {
           You are responsible for the photos you upload and for having the right to share them, including the consent of the people in them where the law requires it.
           Guests who add photos are asked to sign in with Google and are responsible for what they add.
           We may remove content that is illegal or breaks these terms.
+        </p>
+        <p>
+          <strong>Face search.</strong> When you switch on "Find my photos" for an event, you decide that the faces in its photos are measured so guests can find their own photos.
+          You are the controller of that processing and must have a valid legal basis for it, and tell the people you photograph where the law requires it. Do not use it for any other purpose.
+          Guests must agree before each scan. Face measurements are deleted with the event's photos.
+          See the <a href="/privacy#faces">privacy policy</a>.
         </p>
       </section>
 
