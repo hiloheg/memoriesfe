@@ -118,18 +118,22 @@ const startLimit = (event) => (event.guestUploadsEnabled ? event.guestUploadLimi
 
 /** Who can find the event, with its password and main-event choice. Nothing changes until Save is pressed. */
 function SettingsPanel({ event, onSave }) {
+  const { user } = useAuth()
+  const { openBuy } = useCredits()
+  const faceLocked = user?.unlocked === false // face search comes with the first purchase
   const [visibility, setVisibility] = useState(event.visibility)
   const [password, setPassword] = useState(event.accessPassword ?? '')
   const [main, setMain] = useState(event.main)
   const [guestOn, setGuestOn] = useState(event.guestUploadsEnabled)
   const [guestLimit, setGuestLimit] = useState(startLimit(event))
+  const [faceOn, setFaceOn] = useState(event.faceSearchEnabled)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState(null)
 
   const passwordOk = visibility !== 'protected' || (password.length >= 4 && password.length <= 60)
   const limitOk = Number.isInteger(guestLimit) && guestLimit >= 0 && guestLimit <= 50
   const guestChanged = guestOn !== event.guestUploadsEnabled || (guestOn && guestLimit !== event.guestUploadLimit)
-  const dirty = visibility !== event.visibility || main !== event.main || guestChanged
+  const dirty = visibility !== event.visibility || main !== event.main || guestChanged || faceOn !== event.faceSearchEnabled
     || (visibility === 'protected' && password !== (event.accessPassword ?? ''))
 
   function pick(next) {
@@ -145,13 +149,14 @@ function SettingsPanel({ event, onSave }) {
     setMain(event.main)
     setGuestOn(event.guestUploadsEnabled)
     setGuestLimit(startLimit(event))
+    setFaceOn(event.faceSearchEnabled)
     setError(null)
   }
   async function save(e) {
     e.preventDefault()
     setBusy(true)
     setError(null)
-    const message = await onSave({ visibility, password, main, guestOn, guestLimit })
+    const message = await onSave({ visibility, password, main, guestOn, guestLimit, faceOn })
     setBusy(false)
     if (message) setError(message)
   }
@@ -192,6 +197,16 @@ function SettingsPanel({ event, onSave }) {
             <span className="muted">Guests sign in with Google, then add their own photos to this event. They show up straight away, with the guest's name.</span>
           </span>
         </label>
+        <label className="check main-toggle">
+          <input type="checkbox" checked={faceOn} disabled={faceLocked && !event.faceSearchEnabled} onChange={(e) => setFaceOn(e.target.checked)} />
+          <span>
+            <strong>Let guests find their photos by scanning their face</strong>
+            <span className="muted">Guests agree to a face scan first, and their picture is not saved. The faces in your photos are measured on our server and deleted with the event. You are responsible for telling the people you photograph where the law requires it.</span>
+          </span>
+        </label>
+        {faceLocked && !event.faceSearchEnabled && (
+          <p className="muted">Face search comes with your first purchase. <button type="button" className="linklike" onClick={openBuy}>Buy credits</button></p>
+        )}
         {guestOn && (
           <label className="guest-limit">
             <span className="field-label">Photos each guest can add (0 to 50)</span>
@@ -315,6 +330,7 @@ export default function EventDetail() {
     if (!message && (draft.guestOn !== current.guestUploadsEnabled || (draft.guestOn && draft.guestLimit !== current.guestUploadLimit))) {
       message = await call('/guest-uploads', 'PUT', { enabled: draft.guestOn, limit: draft.guestOn ? draft.guestLimit : current.guestUploadLimit })
     }
+    if (!message && draft.faceOn !== current.faceSearchEnabled) message = await call('/face-search', 'PUT', { enabled: draft.faceOn })
     await load()
     return message
   }
@@ -443,7 +459,7 @@ export default function EventDetail() {
         </div>
 
         <aside className="event-side">
-        <SettingsPanel key={`${event.visibility}|${event.accessPassword}|${event.main}|${event.guestUploadsEnabled}|${event.guestUploadLimit}`} event={event} onSave={saveSettings} />
+        <SettingsPanel key={`${event.visibility}|${event.accessPassword}|${event.main}|${event.guestUploadsEnabled}|${event.guestUploadLimit}|${event.faceSearchEnabled}`} event={event} onSave={saveSettings} />
         </aside>
       </div>
       <Modal open={adding} onClose={() => setAdding(false)} title="Add a camera">
