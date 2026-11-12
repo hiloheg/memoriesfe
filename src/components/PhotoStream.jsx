@@ -14,6 +14,9 @@ const API_URL = import.meta.env.VITE_API_URL
 const PAGE = 12
 const MAX = 33 // the profile shows only the newest 33 photos
 
+/** Tile sizes as [columns, rows], repeated down the page: one big, a tall, a wide, a tall, and small ones between. */
+const MOSAIC = [[2, 2], [1, 1], [1, 1], [1, 2], [1, 1], [2, 1], [1, 1], [1, 1], [1, 2], [1, 1]]
+
 /** Same rule as the event gallery: up to 4 columns, none narrower than 150px. */
 const columnsFor = (width) => Math.max(1, Math.min(4, Math.floor((width + 8) / 158)))
 
@@ -169,14 +172,27 @@ export default function PhotoStream({ slug, eventSlug, fallbackName, fallbackDat
 
       {photos.length > 0 && (
         <div className="stream-cols" ref={grid}>
-          {Array.from({ length: cols }, (_, c) => (
-            <div key={c} className="stream-col">
-              {c === 0 && uploadTile}
-              {photos.map((p, i) => i % cols === c && (
+          {cols < 2 ? (
+            <div className="stream-col">
+              {uploadTile}
+              {photos.map((p, i) => (
                 <LazyPhoto key={`${p.byId}/${p.name}`} src={smallUrl(p)} fallback={p.url} label={`Open photo ${i + 1}`} onOpen={() => setOpenIndex(i)} />
               ))}
             </div>
-          ))}
+          ) : (
+            // A mosaic: the tile sizes repeat in a fixed rhythm, so the page has big, wide, tall and small pictures even when the photos look alike.
+            <div className="stream-mosaic" style={{ '--cols': cols }}>
+              <div className="mosaic-cell">{uploadTile}</div>
+              {photos.map((p, i) => {
+                const [w, h] = MOSAIC[i % MOSAIC.length]
+                return (
+                  <div key={`${p.byId}/${p.name}`} className="mosaic-cell" style={{ gridColumn: `span ${Math.min(w, cols)}`, gridRow: `span ${h}` }}>
+                    <LazyPhoto src={smallUrl(p)} fallback={p.url} label={`Open photo ${i + 1}`} onOpen={() => setOpenIndex(i)} />
+                  </div>
+                )
+              })}
+            </div>
+          )}
         </div>
       )}
 

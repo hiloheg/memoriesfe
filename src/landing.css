@@ -200,6 +200,9 @@
 .lp-google:hover { background: #f8f9fa; border-color: #d2e3fc; }
 .lp-google.large { min-height: 48px; padding: 0 22px; font-size: 1rem; }
 @media (prefers-color-scheme: dark) { .lp-google { background: #131314; color: #e3e3e3; border-color: #8e918f; } .lp-google:hover { background: #1f2021; } }
-.lp-legal { display: flex; gap: 18px; margin-left: auto; }
+.lp-legal { display: flex; flex-wrap: wrap; gap: 4px 18px; margin-left: auto; }
+.lp-foot-row { flex-basis: 100%; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px; }
+.lp-sal { display: inline-flex; align-items: center; flex: none; color: var(--lp-soft); }
+.lp-sal img { display: block; height: 46px; width: auto; border-radius: 6px; }
 .lp-legal a, .lp-legal button { color: var(--lp-soft); }
 .lp-legal a:hover, .lp-legal button:hover { color: var(--lp-ink); }

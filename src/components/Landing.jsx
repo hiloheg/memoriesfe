@@ -1,4 +1,5 @@
 import LegalIdentity from './LegalIdentity.jsx'
+import { LEGAL } from '../legal.js'
 import { useEffect, useRef, useState } from 'react'
 import { GoogleLogin, GoogleOAuthProvider } from '@react-oauth/google'
 import { Link } from 'react-router-dom'
@@ -9,7 +10,10 @@ import { QR } from '../qr.js'
 import Logo from './Logo.jsx'
 import Tutorial from './Tutorial.jsx'
 
-const SPARKLE = 'M12 0C12.8 7 17 11.2 24 12C17 12.8 12.8 17 12 24C11.2 17 7 12.8 0 12C7 11.2 11.2 7 12 0Z'
+// The ANPC SAL pictogram; if the file is ever removed the footer shows the same link as text.
+const SAL_IMG = Object.values(import.meta.glob('../assets/anpc-sal.svg', { eager: true, query: '?url', import: 'default' }))[0]
+
+const SPARKLE ='M12 0C12.8 7 17 11.2 24 12C17 12.8 12.8 17 12 24C11.2 17 7 12.8 0 12C7 11.2 11.2 7 12 0Z'
 
 /** Tracks a media query, so the Google button can match the colour scheme and the screen. */
 function useMedia(query) {
@@ -289,9 +293,15 @@ function LandingPage({ error, notice, onLogin }) {
           <Link to="/terms">Terms</Link>
           <Link to="/privacy">Privacy policy</Link>
           <Link to="/refunds">Refunds and withdrawal</Link>
+          <a href={LEGAL.anpcUrl} target="_blank" rel="noopener noreferrer" title={LEGAL.anpcLabel} aria-label={`${LEGAL.anpcLabel} (opens in a new tab)`}>ANPC</a>
           <button type="button" className="linklike" onClick={reopenConsent}>Cookie settings</button>
         </nav>
-        <LegalIdentity />
+        <div className="lp-foot-row">
+          <LegalIdentity />
+          <a className="lp-sal" href={LEGAL.salUrl} target="_blank" rel="noopener noreferrer" title={LEGAL.salLabel} aria-label={`${LEGAL.salLabel} (opens in a new tab)`}>
+            {SAL_IMG ? <img src={SAL_IMG} width="186" height="46" alt="" /> : 'Alternative dispute resolution (SAL)'}
+          </a>
+        </div>
       </footer>
       <CookieBanner />
     </div>

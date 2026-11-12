@@ -200,7 +200,11 @@ textarea:focus-visible { outline-offset: 0; border-color: var(--accent); }
 .address { display: flex; align-items: stretch; border: 1px solid var(--line); border-radius: var(--radius); background: var(--paper); overflow: hidden; }
 .address:focus-within { border-color: var(--accent); outline: 3px solid var(--accent); outline-offset: 2px; }
 .address-prefix { display: flex; align-items: center; padding: 0 4px 0 14px; color: var(--ink-soft); white-space: nowrap; }
-.address input { border: 0; border-radius: 0; padding-left: 0; }
+.address input { border: 0; border-radius: 0; padding-left: 0; flex: 1; min-width: 0; }
+.address input[readonly] { color: var(--ink-soft); cursor: default; }
+.address-lock { display: flex; align-items: center; justify-content: center; width: 44px; border: 0; border-left: 1px solid var(--line); background: transparent; color: var(--ink-soft); cursor: pointer; }
+.address-lock:hover { color: var(--ink); background: color-mix(in srgb, var(--ink) 6%, transparent); }
+.address-lock.open { color: var(--accent); }
 .address input:focus-visible { outline: none; }
 .swatches { display: flex; gap: 10px; flex-wrap: wrap; }
 .swatch { position: relative; cursor: pointer; }
@@ -546,10 +550,18 @@ fieldset:disabled { opacity: 0.75; }
 .stream-date { font-size: 1rem; font-weight: 600; color: var(--ink-soft); }
 .stream-cols { display: flex; align-items: flex-start; gap: 8px; margin-top: 14px; }
 .stream-col { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; }
+.stream-cols { container-type: inline-size; --gap: 8px; }
+.stream-mosaic { width: 100%; display: grid; gap: var(--gap); grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); grid-auto-flow: dense;
+  /* one row is a bit shorter than one column is wide, so a 1x1 tile is a landscape-ish rectangle and a 1x2 tile is a portrait */
+  grid-auto-rows: calc((100cqw - (var(--cols) - 1) * var(--gap)) / var(--cols) * 0.85); }
+.mosaic-cell { min-width: 0; min-height: 0; }
+.stream-mosaic .mosaic-cell > .photo, .stream-mosaic .mosaic-cell > .guest-tile { height: 100%; margin: 0; aspect-ratio: auto; }
+.stream-mosaic .mosaic-cell > .photo { min-height: 0; }
+.stream-mosaic .mosaic-cell > .photo img { height: 100%; object-fit: cover; }
 .stream-sentinel { height: 1px; }
 @media (max-width: 600px) {
   .photo-stream { padding: 0 4px 0; }
-  .stream-cols { gap: 4px; }
+  .stream-cols { gap: 4px; --gap: 4px; }
 }
 
 /* Camera login dialog and per-camera actions */
@@ -1139,21 +1151,6 @@ button.linklike:hover { color: var(--accent-strong); background: none; }
 .legal-id { font-style: normal; display: flex; flex-direction: column; gap: 2px; }
 .legal-footer .legal-id { flex-direction: row; flex-wrap: wrap; gap: 2px 16px; max-width: 90ch; font-size: 0.75rem; opacity: 0.85; }
 @media (max-width: 560px) { .legal-footer { padding-left: 16px; padding-right: 16px; } }
-
-/* ---------- find my photos (face search) ---------- */
-.face-points { margin: 0; padding-left: 1.1em; display: flex; flex-direction: column; gap: 6px; color: var(--ink-soft); font-size: 0.95rem; }
-.face-frame { position: relative; width: min(240px, 64%); aspect-ratio: 3 / 4; margin: 4px auto; border-radius: 50%; overflow: hidden; background: var(--line); box-shadow: 0 0 0 4px var(--paper), 0 0 0 7px var(--accent); }
-.face-frame video, .face-frame img { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); display: block; }
-.face-line { position: absolute; left: 0; right: 0; top: 50%; height: 3px; background: linear-gradient(90deg, transparent, var(--accent), transparent); box-shadow: 0 0 14px var(--accent); opacity: 0; }
-.face-frame.scanning .face-line { opacity: 1; animation: face-sweep 1.6s ease-in-out infinite alternate; }
-@keyframes face-sweep { from { top: 6%; } to { top: 94%; } }
-.face-status { display: flex; align-items: center; justify-content: center; gap: 8px; text-align: center; margin: 0; }
-.face-actions { align-items: center; }
-.face-actions [aria-disabled="true"] { opacity: 0.5; pointer-events: none; }
-.find-me { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; margin: 14px 0 4px; }
-.find-me .muted { font-size: 0.92rem; }
-@media (max-width: 600px) { .face-actions > * { flex: 1; } }
-@media (prefers-reduced-motion: reduce) { .face-frame.scanning .face-line { animation: none; top: 50%; } }
 
 /* ---------- find my photos (face search) ---------- */
 .face-points { margin: 0; padding-left: 1.1em; display: flex; flex-direction: column; gap: 6px; color: var(--ink-soft); font-size: 0.95rem; }

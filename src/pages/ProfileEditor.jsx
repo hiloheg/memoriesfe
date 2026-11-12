@@ -201,8 +201,11 @@ export default function ProfileEditor() {
   const locked = user.unlocked === false // the look and the logo come with the first purchase
   const fileInput = useRef(null)
   const [tab, setTab] = useState('profile')
+  const [slugLocked, setSlugLocked] = useState(true)
+  const slugInput = useRef(null)
   const [saved, setSaved] = useState(() => draftFrom(user))
   const [draft, setDraft] = useState(saved)
+  useEffect(() => { setSlugLocked(true) }, [saved.slug]) // locks again once a new address is saved
   const [status, setStatus] = useState(null) // { kind: 'ok' | 'error', text }
   const [busy, setBusy] = useState(false)
   const [photoBusy, setPhotoBusy] = useState(false)
@@ -371,9 +374,18 @@ export default function ProfileEditor() {
               <span className="field-label">Page address</span>
               <span className="address">
                 <span className="address-prefix">{host}/</span>
-                <input value={draft.slug} onChange={(e) => setDraft((d) => ({ ...d, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '') }))} maxLength={30} required aria-describedby="slug-hint" />
+                <input ref={slugInput} value={draft.slug} readOnly={slugLocked} onChange={(e) => setDraft((d) => ({ ...d, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '') }))} maxLength={30} required aria-describedby="slug-hint" />
+                <button type="button" className={slugLocked ? 'address-lock' : 'address-lock open'} aria-pressed={!slugLocked}
+                  title={slugLocked ? 'Locked. Press to edit the address' : 'Unlocked. Press to lock it again'}
+                  aria-label={slugLocked ? 'Unlock page address' : 'Lock page address'}
+                  onClick={() => { setSlugLocked((v) => !v); if (slugLocked) setTimeout(() => slugInput.current?.focus(), 0) }}>
+                  <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
+                    <rect x="5" y="11" width="14" height="9" rx="2.5" fill="currentColor" />
+                    <path d={slugLocked ? 'M8 11V8a4 4 0 0 1 8 0v3' : 'M8 11V8a4 4 0 0 1 7.5-2'} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                  </svg>
+                </button>
               </span>
-              <small id="slug-hint" className="muted">3 to 30 letters, numbers or hyphens. Changing it breaks QR codes you already printed.</small>
+              <small id="slug-hint" className="muted">{slugLocked ? 'Locked so you do not change it by mistake. ' : ''}3 to 30 letters, numbers or hyphens. Changing it breaks QR codes you already printed.</small>
             </label>
 
             <label className="field">
