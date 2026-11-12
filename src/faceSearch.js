@@ -13,6 +13,11 @@ export function filterFolders(folders, matches) {
     .filter((f) => f.photos.length > 0)
 }
 
+/** The matching photos as one flat list in the shape the profile grid uses (each photo knows its folder), for a face result. */
+export function facePhotos(folders, matches) {
+  return filterFolders(folders, matches).flatMap((f) => f.photos.map((p) => ({ ...p, byId: f.id, camera: f.name, kind: f.kind })))
+}
+
 /** What the gallery shows: the picked camera/guest tags and the face result both have to agree. */
 export function visibleFolders(folders, selectedIds, matches) {
   const tagged = selectedIds.size === 0 ? folders : folders.filter((f) => selectedIds.has(f.id))

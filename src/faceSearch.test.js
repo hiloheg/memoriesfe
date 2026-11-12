@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { filterFolders, matchKey, searchFace, visibleFolders } from './faceSearch.js'
+import { facePhotos, filterFolders, matchKey, searchFace, visibleFolders } from './faceSearch.js'
 
 const folders = [
   { id: 'c1', name: 'Main camera', kind: 'camera', photos: [{ name: 'a.jpg' }, { name: 'b.jpg' }, { name: 'c.jpg' }] },
@@ -70,4 +70,13 @@ test('searchFace explains a network failure in plain words', async () => {
     searchFace({ apiUrl: 'https://api', slug: 'ana', eventSlug: 'nunta', password: '', selfie: new Blob(['x']), fetchImpl: fetchStub }),
     { message: 'Could not reach the server. Check your connection and try again.' },
   )
+})
+
+test('facePhotos lists the matching photos as the profile grid expects them, tagged with their folder', () => {
+  const out = facePhotos(folders, matches)
+  assert.deepEqual(out, [
+    { name: 'c.jpg', byId: 'c1', camera: 'Main camera', kind: 'camera' },
+    { name: 'a.jpg', byId: 'g1', camera: 'Ana', kind: 'guest' },
+  ])
+  assert.deepEqual(facePhotos(folders, []), [])
 })
