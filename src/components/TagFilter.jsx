@@ -12,9 +12,10 @@ const Person = () => (
 /**
  * Chips to filter photos by who took them: one chip per camera and per guest.
  * Pick as many as you like; nothing picked shows everything. Hidden when there is nothing to choose between.
+ * `mine` ({ active, count, onClear }) adds the "Included myself" chip while a face search is applied.
  */
-export default function TagFilter({ tags, selected, onChange }) {
-  if (tags.length < 2) return null
+export default function TagFilter({ tags, selected, onChange, mine }) {
+  if (tags.length < 2 && !mine?.active) return null
   function toggle(id) {
     const next = new Set(selected)
     if (next.has(id)) next.delete(id)
@@ -30,6 +31,13 @@ export default function TagFilter({ tags, selected, onChange }) {
           {t.label} <small>{t.count}</small>
         </button>
       ))}
+      {mine?.active && (
+        <button type="button" className="tab tag-mine" aria-pressed="true" onClick={mine.onClear} title="Show all the photos again">
+          <Person />
+          Included myself <small>{mine.count}</small>
+          <span aria-hidden="true" className="tag-x">×</span>
+        </button>
+      )}
       {selected.size > 0 && <button type="button" className="tab tag-clear" onClick={() => onChange(new Set())}>Clear</button>}
     </nav>
   )

@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import Logo from '../components/Logo.jsx'
+import FaceSearch from '../components/FaceSearch.jsx'
 import GuestUpload from '../components/GuestUpload.jsx'
 import Lightbox from '../components/Lightbox.jsx'
 import PasswordGate from '../components/PasswordGate.jsx'
 import { passwordHeaders, readPassword, writePassword } from '../eventAccess.js'
+import { visibleFolders } from '../faceSearch.js'
 import { LazyPhoto, PhotoGridSkeleton, TopBar } from '../components/Loaders.jsx'
 import { smallUrl } from '../photoUrls.js'
 import TagFilter from '../components/TagFilter.jsx'
@@ -21,6 +23,8 @@ export default function PublicGallery() {
   const [openIndex, setOpenIndex] = useState(null)
   const [password, setPassword] = useState(() => readPassword(slug ?? token, eventSlug ?? ''))
   const [gate, setGate] = useState(null)
+  const [scanOpen, setScanOpen] = useState(false)
+  const [face, setFace] = useState(null) // the answer of a face search: { matches, indexed, total }; null = no face filter
 
   useEffect(() => {
     document.title = 'Photos'
@@ -43,8 +47,8 @@ export default function PublicGallery() {
   }, [token, slug, eventSlug, password, reload])
 
   const visible = useMemo(
-    () => (gallery ? gallery.folders.filter((f) => selected.size === 0 || selected.has(f.id)) : []),
-    [gallery, selected],
+    () => (gallery ? visibleFolders(gallery.folders, selected, face ? face.matches : null) : []),
+    [gallery, selected, face],
   )
   const flat = useMemo(() => visible.flatMap((f) => f.photos.map((p) => ({ ...p, kind: f.kind }))), [visible])
   const total = gallery ? gallery.folders.reduce((n, f) => n + f.photos.length, 0) : 0
@@ -88,8 +92,25 @@ export default function PublicGallery() {
         <p className="muted">{total === 0 ? 'No photos yet. They appear here as the photographers upload.' : `${total} ${total === 1 ? 'photo' : 'photos'}`}</p>
       </header>
 
-      <TagFilter tags={tags} selected={selected} onChange={setSelected} />
-      {selected.size > 0 && <p className="muted" role="status">{shown} {shown === 1 ? 'photo' : 'photos'} match your choice.</p>}
+      {gallery.faceSearch && slug && !face && (
+        <div className="find-me">
+          <button type="button" className="primary" onClick={() => setScanOpen(true)}>Find my photos</button>
+          <span className="muted">Scan your face to see only the photos you are in.</span>
+        </div>
+      )}
+      <TagFilter tags={tags} selected={selected} onChange={setSelected}
+        mine={{ active: Boolean(face), count: face ? face.matches.length : 0, onClear: () => setFace(null) }} />
+      {(selected.size > 0 || face) && <p className="muted" role="status">{shown} {shown === 1 ? 'photo' : 'photos'} match your choice.</p>}
+      {face && face.indexed < face.total && (
+        <p className="muted" role="status">Still looking through the newest photos ({face.indexed} of {face.total}). Scan again in a minute for more.</p>
+      )}
+      {face && face.matches.length === 0 && (
+        <div className="empty find-me">
+          <p>We did not find you yet. Try a closer picture in good light, or check again later.</p>
+          <button type="button" onClick={() => setScanOpen(true)}>Try again</button>
+          <button type="button" onClick={() => setFace(null)}>Show all photos</button>
+        </div>
+      )}
 
       {visible.map((f, fi) => (
         <section key={f.id} className="photo-group">
@@ -107,6 +128,11 @@ export default function PublicGallery() {
       ))}
 
       <footer className="gallery-foot"><Link to="/" className="logo-link" aria-label="Go to the imemories home page"><Logo label={false} /></Link><Link to="/terms" className="legal-link">Terms</Link><Link to="/privacy" className="legal-link">Privacy policy</Link><Link to="/refunds" className="legal-link">Refunds</Link></footer>
+
+      {gallery.faceSearch && slug && (
+        <FaceSearch open={scanOpen} onClose={() => setScanOpen(false)} searchOptions={{ slug, eventSlug, password }}
+          onFound={(result) => { setFace(result); setSelected(new Set()); window.scrollTo({ top: 0 }) }} />
+      )}
 
       <Lightbox photos={flat} index={openIndex} onIndex={setOpenIndex} onClose={close} logoUrl={gallery.logoUrl ?? ''} canEdit={gallery.features?.editor ?? true} />
     </main>
