@@ -1160,5 +1160,23 @@ button.linklike:hover { color: var(--accent-strong); background: none; }
 .find-me .muted { font-size: 0.92rem; }
 @media (max-width: 600px) { .face-actions > * { flex: 1; } }
 @media (prefers-reduced-motion: reduce) { .face-frame.scanning .face-line { animation: none; top: 50%; } }
-.tag-mine { border-color: var(--accent); color: var(--accent); }
+/* The tag bar: chips scroll sideways when they do not fit, the ends fade out, and with a mouse small arrows appear. */
+.tag-bar { position: sticky; top: 0; z-index: 5; margin: 0 -8px 20px; --fade-l: 0px; --fade-r: 0px; }
+.tag-bar[data-left] { --fade-l: 40px; }
+.tag-bar[data-right] { --fade-r: 40px; }
+.tag-bar > .tabs { position: static; margin: 0; scroll-snap-type: x proximity; overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 var(--fade-l), #000 calc(100% - var(--fade-r)), transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0, #000 var(--fade-l), #000 calc(100% - var(--fade-r)), transparent 100%); }
+.tag-bar .tab { scroll-snap-align: start; scroll-margin-inline: 12px; }
+.photo-stream .tag-bar { margin-bottom: 8px; }
+@media (max-width: 600px) { .tag-bar { margin: 0 -12px 16px; } }
+.tag-nudge { display: none; position: absolute; top: 50%; transform: translateY(-50%); width: 32px; height: 32px; min-height: 0; padding: 0; border-radius: 50%; background: var(--paper); border: 1px solid var(--line); box-shadow: 0 2px 10px rgba(18, 22, 28, 0.2); font-size: 1.3rem; line-height: 1; z-index: 1; }
+.tag-nudge-left { left: 6px; }
+.tag-nudge-right { right: 6px; }
+@media (hover: hover) and (pointer: fine) { .tag-nudge { display: inline-flex; align-items: center; justify-content: center; } }
+
+/* "My photos" leads the bar: filled with the page accent so it reads as the one action among the filters; once applied it is the pressed "Included myself" chip. */
+.tag-filter .tab.tag-find { background: var(--accent); border-color: var(--accent); color: var(--on-accent, #fff); font-weight: 700; }
+.tag-filter .tab.tag-find svg { opacity: 1; }
+.tag-filter .tab.tag-mine[aria-pressed='true'] { background: color-mix(in srgb, var(--accent) 14%, var(--paper)); border-color: var(--accent); color: var(--accent); font-weight: 700; }
 .tag-mine .tag-x { margin-left: 2px; font-size: 1.15em; line-height: 1; }

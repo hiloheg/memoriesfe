@@ -150,14 +150,8 @@ export default function PhotoStream({ slug, eventSlug, fallbackName, fallbackDat
         Photos - {info.name}
         {info.eventDate && <span className="stream-date">{formatDay(info.eventDate)}</span>}
       </h2>
-      {faceOffered && !face && (
-        <div className="find-me">
-          <button type="button" className="primary" onClick={() => setScanOpen(true)}>Find my photos</button>
-          <span className="muted">Scan your face to see only the photos you are in.</span>
-        </div>
-      )}
       <TagFilter tags={tags} selected={selected} onChange={pick}
-        mine={{ active: Boolean(face), count: face ? face.matches.length : 0, onClear: () => setFace(null) }} />
+        mine={{ offered: faceOffered, active: Boolean(face), count: face ? face.matches.length : 0, onFind: () => setScanOpen(true), onClear: () => setFace(null) }} />
       {face && face.indexed < face.total && (
         <p className="muted" role="status">Still looking through the newest photos ({face.indexed} of {face.total}). Scan again in a minute for more.</p>
       )}

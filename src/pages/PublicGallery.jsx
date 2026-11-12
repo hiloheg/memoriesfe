@@ -92,14 +92,8 @@ export default function PublicGallery() {
         <p className="muted">{total === 0 ? 'No photos yet. They appear here as the photographers upload.' : `${total} ${total === 1 ? 'photo' : 'photos'}`}</p>
       </header>
 
-      {gallery.faceSearch && slug && !face && (
-        <div className="find-me">
-          <button type="button" className="primary" onClick={() => setScanOpen(true)}>Find my photos</button>
-          <span className="muted">Scan your face to see only the photos you are in.</span>
-        </div>
-      )}
       <TagFilter tags={tags} selected={selected} onChange={setSelected}
-        mine={{ active: Boolean(face), count: face ? face.matches.length : 0, onClear: () => setFace(null) }} />
+        mine={{ offered: Boolean(gallery.faceSearch && slug), active: Boolean(face), count: face ? face.matches.length : 0, onFind: () => setScanOpen(true), onClear: () => setFace(null) }} />
       {(selected.size > 0 || face) && <p className="muted" role="status">{shown} {shown === 1 ? 'photo' : 'photos'} match your choice.</p>}
       {face && face.indexed < face.total && (
         <p className="muted" role="status">Still looking through the newest photos ({face.indexed} of {face.total}). Scan again in a minute for more.</p>
