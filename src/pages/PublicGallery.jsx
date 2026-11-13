@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { reopenConsent } from '../consent.js'
 import Logo from '../components/Logo.jsx'
 import FaceSearch from '../components/FaceSearch.jsx'
 import GuestUpload from '../components/GuestUpload.jsx'
@@ -121,7 +122,7 @@ export default function PublicGallery() {
         </section>
       ))}
 
-      <footer className="gallery-foot"><Link to="/" className="logo-link" aria-label="Go to the imemories home page"><Logo label={false} /></Link><Link to="/terms" className="legal-link">Terms</Link><Link to="/privacy" className="legal-link">Privacy policy</Link><Link to="/refunds" className="legal-link">Refunds</Link></footer>
+      <footer className="gallery-foot"><Link to="/" className="logo-link" aria-label="Go to the imemories home page"><Logo label={false} /></Link><Link to="/terms" className="legal-link">Terms</Link><Link to="/privacy" className="legal-link">Privacy policy</Link><Link to="/refunds" className="legal-link">Refunds</Link><button type="button" className="linklike legal-link" onClick={reopenConsent}>Cookie settings</button></footer>
 
       {gallery.faceSearch && slug && (
         <FaceSearch open={scanOpen} onClose={() => setScanOpen(false)} searchOptions={{ slug, eventSlug, password }}

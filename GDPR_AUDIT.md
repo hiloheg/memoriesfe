@@ -13,7 +13,7 @@
 
 | | |
 |---|---|
-| Overall | The app collects little data and has no ads or analytics, so the base position is good. The main gaps were missing legal pages, third-party calls made before consent, and no way to exercise erasure and access. The code gaps are fixed; the remaining ones are company actions and one product decision (photo retention). |
+| Overall | The app collects little data and has no ads, and its only analytics (Google Analytics, added 13 November 2026) runs only with consent, so the base position is good. The main gaps were missing legal pages, third-party calls made before consent, and no way to exercise erasure and access. The code gaps are fixed; the remaining ones are company actions and one product decision (photo retention). |
 | Fixed in this change | Privacy policy page, cookie/storage banner with consent gate for Google, Google Fonts removed (self-hosted), "Download my data" and "Delete my account", Google no longer loaded for guests. |
 | Needs you before launch | Contact email and address in the policy, processing agreements with providers, a Terms page that makes the photographer-controller / you-processor split binding, a decision on photo retention, log retention set up to match the policy, a data-breach procedure. |
 
@@ -46,7 +46,7 @@ A sole trader with fewer than 250 staff is formally exempt from the record of pr
 | 7 | Choices in the browser (sign-in token, opened follow buttons, event password, consent choice) | Visitor's browser only | Site works | Strictly necessary / requested by the user | Session, or until browser data is cleared | None |
 | 8 | Emails sent to you | Your mailbox | Answer requests | Legitimate interests | As long as needed | Your mail provider |
 
-Special categories: photos at baptisms or weddings can reveal religion, and photos can show children. You do not intend to process special-category data and cannot see it by design, so Art. 9 is a risk to note, not a basis you rely on; the responsibility sits with the photographer (Terms, A3). A full DPIA is **not** required on the current design (no large-scale monitoring, no profiling, no automated decisions), but re-check if you add face recognition, search by person or analytics.
+Special categories: photos at baptisms or weddings can reveal religion, and photos can show children. You do not intend to process special-category data and cannot see it by design, so Art. 9 is a risk to note, not a basis you rely on; the responsibility sits with the photographer (Terms, A3). A full DPIA is **not** required on the current design (no large-scale monitoring, no profiling, no automated decisions), but re-check if you add search by person or change what analytics collects (face search is covered in its own section of the policy).
 
 DPO: not required (no large-scale monitoring or special-category processing as your core activity).
 
@@ -79,7 +79,7 @@ Severity: **High** = fix before launch, **Medium** = fix soon, **Low** = improve
 | F3 (High) | Google Fonts requested from Google's servers on every page view | Fonts self-hosted (npm packages), `<link>` tags removed |
 | F4 (High) | No way to exercise erasure (Art. 17) | Account tab: **Delete my account** removes camera logins, all photos, events, picture, follow buttons, profile. Endpoint `DELETE /api/v1/me` |
 | F5 (Medium) | No way to exercise access and portability (Art. 15, 20) | Account tab: **Download my data** (JSON). Endpoint `GET /api/v1/me/export`. Passwords are deliberately not included |
-| F8 (Medium) | No cookie/storage notice | Banner with equal "Not now" and "Allow Google sign-in" buttons, a "Cookie settings" link to change the choice, and a table of every item the site stores. Nothing else needs consent: no ads, no analytics |
+| F8 (Medium) | No cookie/storage notice | Banner with equal "Not now" and "Allow Google sign-in" buttons, a "Cookie settings" link to change the choice, and a table of every item the site stores. Updated 13 Nov 2026: one global banner with separate choices for Google sign-in and statistics, "Reject all" and "Accept all" equally prominent. See section 9 |
 
 ### Open
 
@@ -118,9 +118,11 @@ Severity: **High** = fix before launch, **Medium** = fix soon, **Low** = improve
 | `memories.follow.*` | Local storage, remembers opened follow buttons | No, requested by the visitor's own action |
 | `memories.eventPassword.*` | Session storage, protected event password | No, strictly necessary |
 | `memories.consent` | Local storage, remembers the cookie choice | No, strictly necessary |
-| Google's cookies | Third party, only after the visitor allows Google sign-in | Yes, given through the banner |
+| `memories.privacyAgreed`, `memories.follow.*` | Local storage, a guest's agreement and opened follow buttons | No, requested by the visitor's own action |
+| `_ga`, `_ga_2CMX4RVC8T` | Cookies set by Google Analytics, 2 years; **only after the visitor allows statistics** | Yes, given through the banner |
+| Google sign-in cookies | Third party, only after the visitor allows Google sign-in | Yes, given through the banner |
 
-The site sets no cookies of its own and uses no analytics, advertising or social-media plugins.
+The site sets no cookies of its own and uses no advertising or social-media plugins. Cookies appear only through the two consent-gated Google items above.
 
 ---
 
@@ -129,7 +131,50 @@ The site sets no cookies of its own and uses no analytics, advertising or social
 | Feature | Files |
 |---|---|
 | Privacy policy | `memoriesfe/src/pages/Privacy.jsx`, route `/privacy` (the address `privacy` is reserved so no photographer can take it) |
-| Consent and banner | `src/consent.js`, `src/components/CookieBanner.jsx`, `src/components/Landing.jsx` (Google loaded only after consent) |
+| Consent and banner | `src/consent.js` (choices: `google`, `analytics`), `src/components/CookieBanner.jsx` (mounted once in `App.jsx`), `src/components/Landing.jsx` (Google sign-in loaded only after consent) |
+| Analytics | `src/analytics.js` (loader, safe page names, cookie removal), `src/components/Analytics.jsx`, tests in `src/analytics.test.js` |
 | Fonts | `src/main.jsx` imports `@fontsource-variable/*`; `index.html` has no font links |
 | Download and delete | `src/components/YourData.jsx`; backend `memoriesbe/.../AccountController.java` |
 | Tests | `MemoriesbeApplicationTests.accountCanBeExportedAndErasedWithEverythingItOwns` |
+
+---
+
+## 9. Google Analytics (added 13 November 2026)
+
+**Stream:** imemories, `https://imemories.eu`, measurement ID `G-2CMX4RVC8T`.
+
+### How consent is enforced
+
+| Rule | How it is done |
+|---|---|
+| Nothing loads before consent | `gtag.js` is injected by `startAnalytics()` only when the stored choice has `analytics: true`. Before that the browser makes no request to Google and no `_ga` cookie exists. The script tag is not in `index.html` |
+| Banner on every page | One `CookieBanner` in `App.jsx`, so guest galleries and photographer pages ask too (before, only some pages had it) |
+| Equal choice | "Reject all" and "Accept all" are the same size and style; "Save my choices" lets the visitor allow one and not the other. Statistics are off by default |
+| Old choices ask again | A choice saved before statistics existed has no `analytics` value, so the banner shows once more |
+| Withdrawal is as easy as consent | "Cookie settings" (landing page, legal pages, photographer footer, guest galleries and profiles) reopens the banner. Switching statistics off sets `ga-disable-<ID>`, stops page reports and deletes `_ga`, `_ga_*`, `_gid` and `_gat*` on the site's domain and its parents |
+| No advertising use | Consent Mode `ad_storage`, `ad_user_data`, `ad_personalization` are always denied; Google signals and ad personalization are off in the config |
+| Private links stay private | `/e/<token>` galleries, profile slugs and event slugs are replaced by `/e/[token]`, `/[profile]`, `/[profile]/[event]` before anything is sent (`templatePath`, tested). Page title is the same generic name. The referrer is sent only if it is another website |
+| Off in development | The ID is applied only in production builds (or when `VITE_GA_MEASUREMENT_ID` is set) |
+
+### Cookies found in the audit
+
+| Cookie | Set by | When | Lifetime |
+|---|---|---|---|
+| `_ga` | Google Analytics | Only after statistics are allowed | 2 years |
+| `_ga_2CMX4RVC8T` | Google Analytics | Only after statistics are allowed | 2 years |
+| Google sign-in cookies (on Google's domain) | Google | Only after Google sign-in is allowed | Set by Google |
+| (none) | The site itself and the API | Never: the API sets no cookies; the site uses only local/session storage listed in section 7 | |
+
+### Actions for you in Google Analytics (cannot be done from the code)
+
+| # | Setting | Why |
+|---|---|---|
+| G1 | **Admin > Data streams > imemories > Enhanced measurement > gear icon**: turn off **"Page changes based on browser history events"**, and preferably **Outbound clicks** and **Site search** | The site is a single-page app. If Google detects page changes on its own it may report the real address of a private gallery. The code overrides the address, but the safe setting is to turn this off |
+| G2 | **Admin > Data collection and modification > Data retention**: set event data retention to **14 months** (default is 2 months) and switch off "Reset user data on new activity" | The policy says 14 months at most |
+| G3 | **Admin > Data collection > Google signals**: leave **off**. **Data sharing settings**: untick Google products and services, benchmarking, technical support | No advertising use; less sharing |
+| G4 | **Admin > Account settings**: accept the **Data Processing Amendment** (Google Ads Data Processing Terms / GA data processing terms) and set the account's data-sharing and "Modeling contributions" off | Art. 28 processor terms with Google |
+| G5 | Do not link Google Ads, Search Console data export or BigQuery without updating the policy | Changes the purposes and recipients |
+
+### Open points
+- Consent proof: the choice and its time are kept only in the visitor's browser. That is enough for most readings of the rules; if you want a server-side record per visitor, it needs a product decision and a new line in the policy.
+- The policy text for statistics was written from the code and the audit; have it reviewed with the rest of the policy (A7).

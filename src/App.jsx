@@ -12,6 +12,8 @@ import Privacy from './pages/Privacy.jsx'
 import Refunds from './pages/Refunds.jsx'
 import Terms from './pages/Terms.jsx'
 import LegalFooter from './components/LegalFooter.jsx'
+import CookieBanner from './components/CookieBanner.jsx'
+import Analytics from './components/Analytics.jsx'
 import Logo from './components/Logo.jsx'
 import { PageLoader, TopProgress } from './components/Loaders.jsx'
 import MainNav from './components/MainNav.jsx'
@@ -68,6 +70,10 @@ function PhotographerShell() {
 
 function App() {
   return (
+    <>
+    {/* One banner and one statistics switch for the whole site, so every page (including guest galleries) asks before anything optional loads. */}
+    <Analytics />
+    <CookieBanner />
     <Routes>
       <Route element={<PhotographerShell />}>
         <Route path="/" element={<Events />} />
@@ -83,6 +89,7 @@ function App() {
       <Route path="/:slug" element={<PublicProfile />} />
       <Route path="/:slug/:eventSlug" element={<PublicProfile />} />
     </Routes>
+    </>
   )
 }
 

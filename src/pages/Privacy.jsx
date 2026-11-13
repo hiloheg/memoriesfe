@@ -1,6 +1,5 @@
 import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import CookieBanner from '../components/CookieBanner.jsx'
 import Logo from '../components/Logo.jsx'
 import { reopenConsent } from '../consent.js'
 
@@ -10,7 +9,7 @@ const COMPANY = 'HILOHE GIGI PFA'
 const CUI = '54766547'
 const CONTACT_EMAIL = import.meta.env.VITE_CONTACT_EMAIL
 const ADDRESS = import.meta.env.VITE_COMPANY_ADDRESS
-const UPDATED = '12 November 2026'
+const UPDATED = '13 November 2026'
 
 function Contact() {
   return (
@@ -46,7 +45,7 @@ export default function Privacy() {
           <a href="#who">Who we are</a>
           <a href="#roles">Two roles</a>
           <a href="#data">What we process</a>
-          <a href="#storage">Cookies and storage</a>
+          <a href="#storage">Cookie policy</a>
           <a href="#sharing">Who else sees data</a>
           <a href="#keep">How long we keep it</a>
           <a href="#rights">Your rights</a>
@@ -140,11 +139,11 @@ export default function Privacy() {
               </tbody>
             </table>
           </div>
-          <p>We do not sell personal data, show ads, build advertising profiles or use analytics trackers. Guests do not need an account to view photos. Adding photos needs a Google sign-in.</p>
+          <p>We do not sell personal data, show ads or build advertising profiles. Visit statistics (Google Analytics) are collected only if you allow them in the cookie banner. Guests do not need an account to view photos. Adding photos needs a Google sign-in.</p>
         </section>
 
         <section id="storage">
-          <h2>Cookies and browser storage</h2>
+          <h2>Cookie policy: cookies and browser storage</h2>
           <p>
             We do not set cookies of our own. We keep a few small items in your browser, only for the site to work. These are strictly necessary or something you asked for, so they do not need your consent:
           </p>
@@ -157,10 +156,30 @@ export default function Privacy() {
                 <tr><td><code>memories.follow.*</code></td><td>Remembers which follow buttons you opened on a photographer's page, so you do not have to repeat them.</td><td>Local storage, until you clear your browser data</td></tr>
                 <tr><td><code>memories.eventPassword.*</code></td><td>Remembers the password you typed for a protected event.</td><td>Session storage, until you close the tab</td></tr>
                 <tr><td><code>memories.privacyAgreed</code></td><td>Remembers that you agreed to this policy on a photographer's page, so you are not asked again.</td><td>Local storage, until you clear your browser data</td></tr>
-                <tr><td><code>memories.consent</code></td><td>Remembers your choice about Google sign-in.</td><td>Local storage, until you clear your browser data</td></tr>
+                <tr><td><code>memories.consent</code></td><td>Remembers your choices about Google sign-in and statistics.</td><td>Local storage, until you clear your browser data</td></tr>
               </tbody>
             </table>
           </div>
+          <p>
+            <strong>Optional: statistics (Google Analytics).</strong> If, and only if, you choose "Accept all" or tick "Statistics" in the cookie banner, we load Google Analytics 4 to count visits and see which pages are used,
+            so we can improve the site. Until you allow it, Google Analytics is not loaded, nothing is sent to Google and no Analytics cookie is set. It sets these cookies on this site:
+          </p>
+          <div className="legal-table" role="region" aria-label="Statistics cookies" tabIndex={0}>
+            <table>
+              <thead><tr><th>Name</th><th>What it is for</th><th>How long</th></tr></thead>
+              <tbody>
+                <tr><td><code>_ga</code></td><td>Tells one browser from another, to count visitors.</td><td>2 years</td></tr>
+                <tr><td><code>_ga_2CMX4RVC8T</code></td><td>Keeps the state of your visit, to count sessions.</td><td>2 years</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>
+            What is sent: a random identifier, the page type (for example "a photo gallery", never the real address of a gallery, a photographer's page or an event, so private links are never shared),
+            the browser, device type, language, approximate location (the city, worked out from the IP address, which Google Analytics does not store) and the time of the visit.
+            We do not use Google's advertising features or link the data to your account or your photos.
+            Legal basis: your consent (Art. 6(1)(a) GDPR and Law 506/2004). Google acts as our processor for this data under its data processing terms, and may handle it in the United States under the EU-US Data Privacy Framework or Standard Contractual Clauses.
+            We keep the data for 14 months at most. You can withdraw consent at any time with "Cookie settings"; the cookies are then removed and nothing more is sent. Refusing has no effect on what you can do on the site.
+          </p>
           <p>
             <strong>Google sign-in.</strong> Photographers sign in with Google. Google's sign-in code is loaded only after you allow it (in the banner, or by pressing "Sign in with Google").
             Loading it tells Google, an independent controller, that you visited, and Google may set its own cookies. See
@@ -179,7 +198,7 @@ export default function Privacy() {
           <h2>Who else sees data</h2>
           <p>We use these providers, who process data for us under data processing terms:</p>
           <ul>
-            <li><strong>Google Ireland Limited</strong>: sign-in (it is also an independent controller for your Google account).</li>
+            <li><strong>Google Ireland Limited</strong>: sign-in (it is also an independent controller for your Google account) and, only if you allow statistics, Google Analytics.</li>
             <li><strong>Neon</strong>: the database that holds account, event and camera records.</li>
             <li><strong>Cloudflare</strong>: storage for the photos and your uploaded picture.</li>
             <li>Our hosting provider, which runs this site and its server.</li>
@@ -284,7 +303,6 @@ export default function Privacy() {
         <Link to="/">Back to imemories</Link>
         <button type="button" className="linklike" onClick={reopenConsent}>Cookie settings</button>
       </footer>
-      <CookieBanner />
     </div>
   )
 }

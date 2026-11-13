@@ -3,8 +3,7 @@ import { LEGAL } from '../legal.js'
 import { useEffect, useRef, useState } from 'react'
 import { GoogleLogin, GoogleOAuthProvider } from '@react-oauth/google'
 import { Link } from 'react-router-dom'
-import { reopenConsent, saveConsent, useConsent } from '../consent.js'
-import CookieBanner from './CookieBanner.jsx'
+import { allowGoogle, reopenConsent, useConsent } from '../consent.js'
 import '../landing.css'
 import { QR } from '../qr.js'
 import Logo from './Logo.jsx'
@@ -50,7 +49,7 @@ function GoogleSignIn({ onLogin, size = 'medium' }) {
 
   if (!consent?.google) {
     return (
-      <button type="button" className={`lp-google ${size}`} onClick={() => saveConsent(true)} title="This loads Google sign-in">
+      <button type="button" className={`lp-google ${size}`} onClick={() => allowGoogle()} title="This loads Google sign-in">
         <GoogleMark />
         <span className={tiny && size === 'medium' ? 'sr-only' : undefined}>Sign in with Google</span>
       </button>
@@ -303,7 +302,6 @@ function LandingPage({ error, notice, onLogin }) {
           </a>
         </div>
       </footer>
-      <CookieBanner />
     </div>
   )
 }

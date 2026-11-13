@@ -1,7 +1,6 @@
 import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { reopenConsent } from '../consent.js'
-import CookieBanner from './CookieBanner.jsx'
 import Logo from './Logo.jsx'
 
 /** Shared frame of the plain legal pages (terms, refunds): same header, body and footer as the privacy policy. */
@@ -25,7 +24,6 @@ export default function LegalPage({ title, updated, intro, children }) {
         <Link to="/">Back to imemories</Link>
         <button type="button" className="linklike" onClick={reopenConsent}>Cookie settings</button>
       </footer>
-      <CookieBanner />
     </div>
   )
 }

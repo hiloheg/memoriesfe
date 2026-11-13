@@ -1,7 +1,8 @@
 import { useSyncExternalStore } from 'react'
 
-// What the visitor chose about loading Google sign-in (the only third party this site can contact).
-// The choice itself is kept in this browser so we do not ask again; it can be changed any time from "Cookie settings".
+// What the visitor chose about the two optional things this site can load: Google sign-in and Google Analytics statistics.
+// Nothing optional runs before a choice is saved. The choice is kept in this browser so we do not ask again;
+// it can be changed any time from "Cookie settings".
 const KEY = 'memories.consent'
 const EVENT = 'memories:consent'
 const REOPEN = 'memories:consent-open'
@@ -32,14 +33,24 @@ function subscribe(listener) {
   }
 }
 
-/** Saves the choice: `google` is true when loading Google sign-in is allowed. */
-export function saveConsent(google) {
+/** Saves the choice: `google` is true when loading Google sign-in is allowed, `analytics` when statistics are allowed. */
+export function saveConsent({ google, analytics }) {
   try {
-    localStorage.setItem(KEY, JSON.stringify({ google: Boolean(google), at: new Date().toISOString() }))
+    localStorage.setItem(KEY, JSON.stringify({ google: Boolean(google), analytics: Boolean(analytics), at: new Date().toISOString() }))
   } catch {
     /* storage unavailable: the banner shows again next visit */
   }
   window.dispatchEvent(new Event(EVENT))
+}
+
+/** The visitor pressed "Sign in with Google": allow Google and keep whatever they chose about statistics (off if they have not chosen). */
+export function allowGoogle() {
+  saveConsent({ google: true, analytics: Boolean(snapshot()?.analytics) })
+}
+
+/** True once the visitor has made the current choice. An older saved choice that did not cover statistics counts as not made. */
+export function isDecided(consent) {
+  return typeof consent?.analytics === 'boolean'
 }
 
 /** Opens the banner again (the "Cookie settings" links). */

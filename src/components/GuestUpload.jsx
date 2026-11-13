@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { GoogleLogin, GoogleOAuthProvider } from '@react-oauth/google'
 import { readError } from '../accents.js'
-import { saveConsent, useConsent } from '../consent.js'
+import { allowGoogle, useConsent } from '../consent.js'
 import { passwordHeaders } from '../eventAccess.js'
 import { guestFetch, readGuestToken, writeGuestToken } from '../guestAuth.js'
 import { prepareImage } from '../prepareImage.js'
@@ -12,7 +12,7 @@ import Modal from './Modal.jsx'
 function GuestSignIn({ onToken }) {
   const consent = useConsent()
   if (!consent?.google) {
-    return <button type="button" className="primary" onClick={() => saveConsent(true)} title="This loads Google sign-in">Sign in with Google</button>
+    return <button type="button" className="primary" onClick={() => allowGoogle()} title="This loads Google sign-in">Sign in with Google</button>
   }
   return (
     <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
